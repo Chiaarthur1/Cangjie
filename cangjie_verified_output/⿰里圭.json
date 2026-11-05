@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰里圭",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "里",
+    "phonetic_component": "圭",
+    "predicted_pinyin": "guī",
+    "paleographic_reasoning": "Семантический радикал '里' (village) задает категориальное поле. Фонетический компонент '圭' определяет нормативное чтение [guī] согласно законам фоносемантической деривации (形声字). Топологическая сборка выполнена по структуре ⿰.",
+    "ltn_satisfiability": 0.1612
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰里圭.png",
+    "vector_svg": "./cangjie_verified_output/⿰里圭.svg"
+  }
+}

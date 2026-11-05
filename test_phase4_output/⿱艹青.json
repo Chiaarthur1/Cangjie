@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "ids_sequence": "⿱艹青",
+    "structure": "TOP_BOTTOM",
+    "semantic_radical": "艸 (艹)",
+    "semantic_radical_name": "grass",
+    "phonetic_component": "青",
+    "predicted_pinyin": "qīng",
+    "total_strokes": 11,
+    "is_novel": true,
+    "creation_timestamp": "2026-PRODUCTION-PHASE4"
+  },
+  "ltn_verification": {
+    "ids": "⿱艹青",
+    "satisfiability": 0.931,
+    "differentiable_loss": 0.069,
+    "novelty_guarantee": true,
+    "radical_confidence": 0.98,
+    "phonetic_confidence": 0.95,
+    "vision_alignment": 1.0,
+    "status": "VERIFIED_NOVEL"
+  },
+  "render_path": "test_phase4_output/⿱艹青.png"
+}

@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰齿孚",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "齿",
+    "phonetic_component": "孚",
+    "predicted_pinyin": "fú",
+    "paleographic_reasoning": "Семантический радикал '齿' (tooth) задает категориальное поле. Фонетический компонент '孚' определяет нормативное чтение [fú] согласно законам фоносемантической деривации (形声字). Топологическая сборка выполнена по структуре ⿰.",
+    "ltn_satisfiability": 0.146
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰齿孚.png",
+    "vector_svg": "./cangjie_verified_output/⿰齿孚.svg"
+  }
+}

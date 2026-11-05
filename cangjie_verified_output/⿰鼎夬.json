@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰鼎夬",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "鼎",
+    "phonetic_component": "夬",
+    "predicted_pinyin": "guài",
+    "paleographic_reasoning": "Семантический радикал '鼎' (tripod) задает смысловой универсум знака. Фонетический компонент '夬' определяет нормативное чтение [guài] в соответствии с каноническим правилом фоносемантической деривации (形声字). Топологическая композиция выполнена оператором ⿰.",
+    "ltn_satisfiability": 0.6239
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰鼎夬.png",
+    "vector_svg": "./cangjie_verified_output/⿰鼎夬.svg"
+  }
+}

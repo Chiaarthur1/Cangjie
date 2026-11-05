@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰黹殳",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "黹",
+    "phonetic_component": "殳",
+    "predicted_pinyin": "shū",
+    "paleographic_reasoning": "Семантический радикал '黹' (embroidery) задает категориальное поле. Фонетический компонент '殳' определяет нормативное чтение [shū] согласно законам фоносемантической деривации (形声字). Топологическая сборка выполнена по структуре ⿰.",
+    "ltn_satisfiability": 0.1511
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰黹殳.png",
+    "vector_svg": "./cangjie_verified_output/⿰黹殳.svg"
+  }
+}

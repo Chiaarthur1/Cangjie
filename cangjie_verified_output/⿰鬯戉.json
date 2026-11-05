@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰鬯戉",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "鬯",
+    "phonetic_component": "戉",
+    "predicted_pinyin": "yuè",
+    "paleographic_reasoning": "Семантический радикал '鬯' (sacrificial_wine) задает категориальное поле. Фонетический компонент '戉' определяет нормативное чтение [yuè] согласно законам фоносемантической деривации (形声字). Топологическая сборка выполнена по структуре ⿰.",
+    "ltn_satisfiability": 0.1508
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰鬯戉.png",
+    "vector_svg": "./cangjie_verified_output/⿰鬯戉.svg"
+  }
+}

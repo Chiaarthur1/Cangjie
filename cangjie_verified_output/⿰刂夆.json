@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰刂夆",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "刂",
+    "phonetic_component": "夆",
+    "predicted_pinyin": "féng",
+    "paleographic_reasoning": "Семантический радикал '刂' (knife) задает категориальное поле. Фонетический компонент '夆' определяет нормативное чтение [féng] согласно законам фоносемантической деривации (形声字). Топологическая сборка выполнена по структуре ⿰.",
+    "ltn_satisfiability": 0.1523
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰刂夆.png",
+    "vector_svg": "./cangjie_verified_output/⿰刂夆.svg"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰厂白",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "厂",
+    "phonetic_component": "白",
+    "predicted_pinyin": "bái",
+    "paleographic_reasoning": "Семантический радикал '厂' (cliff) задает смысловой универсум знака. Фонетический компонент '白' определяет нормативное чтение [bái] в соответствии с каноническим правилом фоносемантической деривации (形声字). Топологическая композиция выполнена оператором ⿰.",
+    "ltn_satisfiability": 0.6001
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰厂白.png",
+    "vector_svg": "./cangjie_verified_output/⿰厂白.svg"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰气畐",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "气",
+    "phonetic_component": "畐",
+    "predicted_pinyin": "fú",
+    "paleographic_reasoning": "Семантический радикал '气' (steam_qi) задает смысловой универсум знака. Фонетический компонент '畐' определяет нормативное чтение [fú] в соответствии с каноническим правилом фоносемантической деривации (形声字). Топологическая композиция выполнена оператором ⿰.",
+    "ltn_satisfiability": 0.6436
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰气畐.png",
+    "vector_svg": "./cangjie_verified_output/⿰气畐.svg"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰斗喿",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "斗",
+    "phonetic_component": "喿",
+    "predicted_pinyin": "zào",
+    "paleographic_reasoning": "Семантический радикал '斗' (dipper) задает категориальное поле. Фонетический компонент '喿' определяет нормативное чтение [zào] согласно законам фоносемантической деривации (形声字). Топологическая сборка выполнена по структуре ⿰.",
+    "ltn_satisfiability": 0.1658
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰斗喿.png",
+    "vector_svg": "./cangjie_verified_output/⿰斗喿.svg"
+  }
+}

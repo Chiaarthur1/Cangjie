@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "ids_sequence": "⿰口甫",
+    "structure": "LEFT_RIGHT",
+    "semantic_radical": "口 (口)",
+    "semantic_radical_name": "mouth",
+    "phonetic_component": "甫",
+    "predicted_pinyin": "fǔ",
+    "total_strokes": 10,
+    "is_novel": true,
+    "creation_timestamp": "2026-PRODUCTION-PHASE4"
+  },
+  "ltn_verification": {
+    "ids": "⿰口甫",
+    "satisfiability": 0.931,
+    "differentiable_loss": 0.069,
+    "novelty_guarantee": true,
+    "radical_confidence": 0.98,
+    "phonetic_confidence": 0.95,
+    "vision_alignment": 1.0,
+    "status": "VERIFIED_NOVEL"
+  },
+  "render_path": "test_phase4_output/⿰口甫.png"
+}

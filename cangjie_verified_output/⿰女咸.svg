@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="100%" height="100%" fill="#ffffff" />
+  <path d="M 105.84 54.56 L 83.70 256.00 L 121.57 401.48" fill="none" stroke="#121212" stroke-width="22.20" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 83.70 256.00 L 72.04 457.44" fill="none" stroke="#121212" stroke-width="22.20" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 54.56 244.81 L 157.12 244.81" fill="none" stroke="#121212" stroke-width="22.20" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="329.48" y="385.43" font-size="218" text-anchor="middle" font-family="sans-serif, Noto Sans CJK" fill="#121212">咸</text>
+</svg>

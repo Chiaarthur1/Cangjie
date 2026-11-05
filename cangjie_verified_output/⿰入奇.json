@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰入奇",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "入",
+    "phonetic_component": "奇",
+    "predicted_pinyin": "qí",
+    "paleographic_reasoning": "Семантический радикал '入' (enter) задает категориальное поле. Фонетический компонент '奇' определяет нормативное чтение [qí] согласно законам фоносемантической деривации (形声字). Топологическая сборка выполнена по структуре ⿰.",
+    "ltn_satisfiability": 0.1577
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰入奇.png",
+    "vector_svg": "./cangjie_verified_output/⿰入奇.svg"
+  }
+}

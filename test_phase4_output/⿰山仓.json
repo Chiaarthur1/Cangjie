@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "ids_sequence": "⿰山仓",
+    "structure": "LEFT_RIGHT",
+    "semantic_radical": "山 (山)",
+    "semantic_radical_name": "mountain",
+    "phonetic_component": "仓",
+    "predicted_pinyin": "cāng",
+    "total_strokes": 7,
+    "is_novel": true,
+    "creation_timestamp": "2026-PRODUCTION-PHASE4"
+  },
+  "ltn_verification": {
+    "ids": "⿰山仓",
+    "satisfiability": 0.931,
+    "differentiable_loss": 0.069,
+    "novelty_guarantee": true,
+    "radical_confidence": 0.98,
+    "phonetic_confidence": 0.95,
+    "vision_alignment": 1.0,
+    "status": "VERIFIED_NOVEL"
+  },
+  "render_path": "test_phase4_output/⿰山仓.png"
+}

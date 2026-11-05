@@ -1,0 +1,13 @@
+model_name_or_path: deepseek-ai/DeepSeek-R1-Distill-Qwen-7B
+stage: sft
+do_train: true
+finetuning_type: full
+deepspeed: ./data/ds_zero2_cangjie_3b.json
+dataset: cangjie_verified_cot_corpus
+cutoff_len: 2048
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 2
+learning_rate: 2.0e-5
+num_train_epochs: 3.0
+bf16: false
+output_dir: ./cangjie_qwen25_3b_student

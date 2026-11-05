@@ -1,0 +1,251 @@
+@@ -0,0 +1,250 @@
++# Project Cangjie — ГДЕ КАЧАТЬ ДАННЫЕ
++
++Все ссылки проверены (живые, отвечают). Дата: 26.10.2026.
++
++Ключевое: **тебе не нужно скрейпить** — ниже готовые датасеты с
++разметкой, в том числе с **нерасшифрованными** знаками (это ровно твоя
++задача) и с **контекстом находки** (предложениями).
++
++---
++
++## ⭐ ТОП-3: бьют прямо в цель
++
++### 1. OBIMD — Oracle Bone Inscriptions Multi-modal Dataset
++
++**Лучший выбор под твою задачу.** Единственный датасет, где есть
++**и картинки, и разметка боксов, и контекст (расшифровка предложения)**.
++
++| | |
++|---|---|
++| GitHub | https://github.com/libang1991/OBIMD |
++| HuggingFace | https://huggingface.co/datasets/KLOBIP/OBIMD |
++| Лицензия | **CC BY-4.0** (коммерческое использование разрешено) |
++| DOI | 10.57967/hf/7828 |
++| Статья | arXiv:2407.03900 |
++
++Объём:
++- **10 077** изображений надписей (5 фаз династии Шан)
++- **93 652** размеченных знака с bounding boxes (`Position: x,y,w,h`)
++- **21 667** позиций «знак утрачен» (фрагментация кости)
++- **21 941 предложение** с транскрипцией и порядком чтения ← **КОНТЕКСТ**
++- 4 192 нефразовых элемента
++
++Файлы для скачивания (прямые):
++```bash
++# аннотации: пути, боксы, предложения, порядок чтения
++curl -L -o data.json "https://huggingface.co/datasets/KLOBIP/OBIMD/resolve/main/data.json"
++
++# оттиски (拓片) — 558 МБ, основной визуальный ряд
++curl -L -o rubbing.zip "https://huggingface.co/datasets/KLOBIP/OBIMD/resolve/main/rubbing.zip"
++
++# копии-факсимиле (摹本) — 211 МБ, выровненные с оттисками
++curl -L -o facsimile.zip "https://huggingface.co/datasets/KLOBIP/OBIMD/resolve/main/facsimile.zip"
++
++# иерархия под-знаков + маппинги (XLSX)
++curl -L -O "https://huggingface.co/datasets/KLOBIP/OBIMD/resolve/main/Hierarchical%20Character%20Metadata%20Supplement.zip"
++
++# или всё одной командой через huggingface-cli
++pip install -U "huggingface_hub[cli]"
++huggingface-cli download KLOBIP/OBIMD --repo-type dataset --local-dir data/OBIMD
++```
++
++**Почему это твой датасет:** `GroupCategory` + `OrderNumber` дают
++**предложение**, в котором найден знак. Это и есть «контекст находки»
++из твоего сценария — палеограф смотрит на один иероглиф, а программа
++знает, что вокруг него стояло. По контексту можно ранжировать гипотезы
++о прочтении.
++
++---
++
++### 2. HUST-OBC — открытый датасет для распознавания И РАСШИФРОВКИ
++
++**Ключевое: содержит 9 411 НЕРАСШИФРОВАННЫХ категорий.** Ровно то,
++что нужно твоей программе — знаки, которые учёные до сих пор не прочли.
++
++| | |
++|---|---|
++| GitHub | https://github.com/Pengjie-W/HUST-OBC |
++| Лицензия | CC BY-NC 4.0 (некоммерческая — осторожно с продуктом) |
++| Статья | arXiv:2401.15365 |
++
++Объём: **140 053** изображения
++- расшифрованные: 77 064 фото / 1 588 категорий
++- **НЕРАСШИФРОВАННЫЕ: 62 989 фото / 9 411 категорий** ← вот это
++- GuoXueDaShi (ненадёжные): отдельно
++
++Прямые ссылки:
++```bash
++# основной архив (Figshare)
++curl -L -o HUST-OBC.zip "https://figshare.com/ndownloader/files/48465988?private_link=8a9c0420312d94fc01e3"
++
++# или с ModelScope (стабильнее)
++curl -L -o HUST-OBC.zip "https://www.modelscope.cn/datasets/wpj2003/HUST-OBC/resolve/master/HUST-OBC.zip"
++
++# OCR-подмножество
++curl -L -o OCR.zip "https://figshare.com/s/b03be2bccdd867b73e5f"
++
++# или клонировать целиком
++git clone https://www.modelscope.cn/datasets/wpj2003/HUST-OBC.git
++```
++
++Структура:
++```
++HUST-OBC/
++├── deciphered/          ← 1588 расшифрованных категорий
++│   ├── <ID>/            ← папка с фото
++│   ├── chinese_to_ID.json
++│   └── ID_to_chinese.json
++├── undeciphered/        ← 9411 НЕРАСШИФРОВАННЫХ категорий
++│   ├── L/  X/  Y+H/
++└── GuoXueDaShi_1390/
++```
++`ID_to_chinese.json` — маппинг ID → иероглиф. Уже разобрано!
++
++---
++
++### 3. EVOBC — эволюция знака по шести эпохам
++
++**229 170 фото / 13 714 категорий.** Одна и та же категория собрана по
++шести историческим эпохам — это эволюционная траектория знака.
++
++| | |
++|---|---|
++| GitHub | https://github.com/Yuliang-Liu/Open-Oracle |
++| Код | https://github.com/RomanticGodVAN/character-Evolution-Dataset |
++| Figshare | https://figshare.com/s/ce2cf55b35a2f8ecc4c6 |
++| Статья | arXiv:2401.12467 |
++
++Эпохи: **甲骨文** (OBC) → **金文** (BI) → **篆书** (SS) → **春秋** (SAC) →
++**战国** (WSC) → **隶书** (CS)
++
++Структура: 9 папок по источнику и эпохе:
++```
++Book_Oracle/  Book_Bronze/  Book_SprAut/  Book_War/
++Website_Oracle/  Website_Bronze/  Website_War/  Website_Seal/  Website_Clerical/
++```
+++ JSON-аннотации (пути, категории, размеры).
++
++**Для чего тебе:** твой банк сейчас 4 эры (кайшу/甲骨/金文/篆). EVOBC
++закроет **春秋 и 战国** — а это как раз эпохи, где иероглифы дивергировали
++больше всего (то есть больше всего «неизвестных»).
++
++---
++
++## Ещё датасеты (полезные)
++
++### 4. IsOBS (THUNLP) — база знаний по 甲骨文
++- GitHub: https://github.com/thunlp/isobs
++- Демо: http://isobs.thunlp.org/
++- 5 000+ документов с оттисками и последовательностями знаков
++- 22 161 рукописный знак / 2 342 класса (110×200 px)
++- Статья: https://aclanthology.org/2020.emnlp-demos.29.pdf
++- Лицензия: смотри в репозитории (для исследований)
++
++### 5. Oracle-MNIST — быстрый бенчмарк
++- GitHub: https://github.com/wm-bupt/oracle-mnist
++- 30 222 фото / 10 категорий, 28×28 (как MNIST) + полные 224×224
++- Figshare / Science Data Bank (без регистрации)
++- Бесплатно, без регистрации — для быстрой проверки пайплайна
++
++### 6. PictOBI-20k — для оценки LMM на расшифровку
++- GitHub: https://github.com/OBI-Future/PictOBI-20k
++- 20 000 изображений, 15 000+ вопросов с multiple-choice
++- 80 пиктографических 甲骨文 + 4 833 фото реальных объектов
++- Статья: https://arxiv.org/pdf/2509.05773
++
++### 7. CASIA-HWDB — рукописный современный китайский
++Нужен для детектора **современных** иероглифов (混在 реальных фото).
++- Официальная страница: https://nlpr.ia.ac.cn/databases/handwriting/Download.html
++- 3 895 135 образцов / 7 185 классов (формат .gnt)
++- Kaggle (уже в PNG, проще): https://www.kaggle.com/datasets/pascalbliem/handwritten-chinese-character-hanzi-datasets/data
++- HuggingFace ( parquet, 1.36 GB): https://huggingface.co/datasets/Teklia/CASIA-HWDB2-line
++- Скрипты конвертации .gnt → PNG: https://github.com/yubocai-poly/Chinese-character-OCR-with-CNN-and-EfficientNet
++
++---
++
++## Веб-источники самих глифов (для пополнения банка)
++
++Это не датасеты, а **живые базы** — оттуда банк полных знаков берёт
++остальные знаки:
++
++| Ресурс | Ссылка | Что даёт |
++|---|---|---|
++| **国学大师** GuoXueDaShi | https://www.guoxuedashi.net/zixing/yanbian/ | Эволюция знака от пиктографа до современного. 10 158 категорий |
++| **殷契文渊** YinQiWenYuan | http://jgw.aynu.edu.cn/ajaxpage/home2.0 | 甲骨文 с разбивкой на знаки. Источник Oracle-MNIST |
++| **Chinese Text Project** | https://ctext.org/ | Тексты с разметкой — для контекста и чтения вслух |
++| **Wikimedia Commons** | https://commons.wikimedia.org/wiki/Category:Oracle_bone_script | Фото музейных экспонатов (PD/CC0) |
++| **CHISE IDS** | https://github.com/cjkvi/cjkvi-ids | Разборы по IDS — уже в твоём проекте |
++| **Make Me a Hanzi** | https://github.com/skishore/makemeahanzi | Скелеты 9 575 знаков — уже в твоём проекте |
++| **Unihan** | https://www.unicode.org/charts/PDF/UCD.pdf | Фонология, чтения — уже в твоём проекте |
++| **汉典** zdic | https://www.zdic.net/hans/龘 | Глоссы, иероглифы, варианты написания |
++| **Baidu Baike / 中国哲学书电子化计划** | https://ctext.org/ | Исторические тексты |
++
++---
++
++## Что уже есть в твоём проекте (качать не нужно)
++
++| Файл | Что |
++|---|---|
++| `data/IDS-UCS-Basic.txt` + `data/chise_all/*` | CHISE IDS — 173 870 разборов |
++| `data/Unihan_*.txt` | фонология, чтения, варианты |
++| `data/dictionary.txt`, `data/graphics.txt` | MakeMeAHanzi — скелеты |
++| `data/Baxter_Sagart.csv` | древнекитайская реконструкция |
++| `data/cangjie_paleo_templates_*.npz` | банки компонентов (4 эры, пересобраны) |
++| `data/calibration_v96.json` | калибровка уверенности |
++
++---
++
++## Что качать тебе (приоритет)
++
++### Прямо сейчас — для обучения детектора
++```bash
++# 1) OBIMD: разметка + оттиски (главное)
++pip install -U "huggingface_hub[cli]"
++huggingface-cli download KLOBIP/OBIMD --repo-type dataset --local-dir data/OBIMD
++# data.json 41 МБ + rubbing.zip 558 МБ + facsimile.zip 211 МБ
++
++# 2) CASIA-HWDB (современные рукописные) — Kaggle, уже в PNG
++#    https://www.kaggle.com/datasets/pascalbliem/handwritten-chinese-character-hanzi-datasets/data
++```
++
++### После — для дедукции по контексту
++```bash
++# 3) HUST-OBC — нерасшифрованные знаки (цель проекта!)
++curl -L -o HUST-OBC.zip "https://www.modelscope.cn/datasets/wpj2003/HUST-OBC/resolve/master/HUST-OBC.zip"
++
++# 4) EVOBC — эволюция по шести эпохам
++# https://figshare.com/s/ce2cf55b35a2f8ecc4c6
++```
++
++---
++
++## Юридическое (важно, если пойдёшь в продукт)
++
++| Датасет | Лицензия | Можно в коммерческий продукт? |
++|---|---|---|
++| **OBIMD** | CC BY-4.0 | **да**, с указанием авторства |
++| HUST-OBC | CC BY-NC 4.0 | **нет** (non-commercial) — только для исследований |
++| EVOBC | смотри на Figshare | проверь перед использованием |
++| IsOBS | см. репозиторий | проверь |
++| CASIA-HWDB | бесплатно для исследований | проверь условия |
++| Wikimedia Commons | PD / CC0 / CC BY / CC BY-SA | зависит от файла — у каждого своя |
++
++**Для коммерческого продукта safest — OBIMD (CC BY-4.0).** Остальные
++используй для исследований и внутренних тестов.
++
++Мой скрипт `cangjie_museum_dataset.py` пишет лицензии и авторов в
++`manifest.jsonl` — не выбрасывай их, если планируешь публикацию.
++
++---
++
++## Сводка: сколько это данных
++
++| Датасет | Фото | Категорий | Нерасшифр. | Контекст | Лицензия |
++|---|---|---|---|---|---|
++| **OBIMD** | 10 077 | 93 652 знака | — | **21 941 предл.** | **CC BY-4.0** |
++| **HUST-OBC** | 140 053 | 10 999 | **9 411** | — | CC BY-NC |
++| **EVOBC** | 229 170 | 13 714 | — | 6 эпох | проверить |
++| IsOBS | 22 161 + 5 000 док. | 2 342 + документы | — | последовательности | проверить |
++| Oracle-MNIST | 30 222 | 10 | — | — | free |
++| CASIA-HWDB | 3 895 135 | 7 185 | — | строки/страницы | research |

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="100%" height="100%" fill="#ffffff" />
+  <path d="M 151.99 54.56 L 75.07 227.22" fill="none" stroke="#121212" stroke-width="22.20" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 90.46 123.63 L 126.35 250.24 L 90.46 457.44 L 64.82 411.40" fill="none" stroke="#121212" stroke-width="22.20" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 54.56 307.80 L 157.12 192.69" fill="none" stroke="#121212" stroke-width="22.20" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="329.48" y="385.43" font-size="218" text-anchor="middle" font-family="sans-serif, Noto Sans CJK" fill="#121212">尚</text>
+</svg>

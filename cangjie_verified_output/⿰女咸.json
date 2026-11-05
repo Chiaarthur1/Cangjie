@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰女咸",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "女",
+    "phonetic_component": "咸",
+    "predicted_pinyin": "xián",
+    "paleographic_reasoning": "Семантический радикал '女' (woman) задает смысловой универсум знака. Фонетический компонент '咸' определяет нормативное чтение [xián] в соответствии с каноническим правилом фоносемантической деривации (形声字). Топологическая композиция выполнена оператором ⿰.",
+    "ltn_satisfiability": 0.6831
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰女咸.png",
+    "vector_svg": "./cangjie_verified_output/⿰女咸.svg"
+  }
+}

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+build/
+cmake-build-*/
+.gradle/
+.idea/
+.vscode/
+*.pt
+*.pth
+*.onnx
+*.sqlite
+*.db
+datasets/
+data/raw/

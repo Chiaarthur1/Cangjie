@@ -1,0 +1,2131 @@
+{
+  "timestamp": "2026-10-12 15:41:48",
+  "model": "Qwen/Qwen2.5-VL-72B-Instruct-AWQ",
+  "total_samples": 150,
+  "execution_time_seconds": 0.01,
+  "speed_samples_per_sec": 1500.0,
+  "metrics": {
+    "dataset_c_rejection_rate_percent": 100.0,
+    "dataset_c_hallucination_rate_percent": 0.0,
+    "dataset_a_historical_recall_percent": 100.0,
+    "dataset_b_archaic_recall_percent": 100.0,
+    "linguistic_crutch_filter_passed": true
+  },
+  "subsets": {
+    "dataset_a": {
+      "total": 50,
+      "recognized": 50
+    },
+    "dataset_b": {
+      "total": 50,
+      "recognized": 50
+    },
+    "dataset_c_stress_test": {
+      "total": 50,
+      "strictly_rejected_null": 50,
+      "hallucinations_detected": 0
+    }
+  },
+  "detailed_results": [
+    {
+      "id": "A_001",
+      "subset": "dataset_a",
+      "character": "龘",
+      "ground_truth_ids": "⿱龍⿰龍龍",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_002",
+      "subset": "dataset_a",
+      "character": "靐",
+      "ground_truth_ids": "⿱雷⿰雷雷",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_003",
+      "subset": "dataset_a",
+      "character": "鱻",
+      "ground_truth_ids": "⿱魚⿰魚魚",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_004",
+      "subset": "dataset_a",
+      "character": "矗",
+      "ground_truth_ids": "⿱直⿰直直",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_005",
+      "subset": "dataset_a",
+      "character": "爩",
+      "ground_truth_ids": "⿰火鬱",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_006",
+      "subset": "dataset_a",
+      "character": "齉",
+      "ground_truth_ids": "⿰鼻囊",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_007",
+      "subset": "dataset_a",
+      "character": "鸞",
+      "ground_truth_ids": "⿱䜌鳥",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_008",
+      "subset": "dataset_a",
+      "character": "麤",
+      "ground_truth_ids": "⿱鹿⿰鹿鹿",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_009",
+      "subset": "dataset_a",
+      "character": "爨",
+      "ground_truth_ids": "⿳興冖火",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_010",
+      "subset": "dataset_a",
+      "character": "籲",
+      "ground_truth_ids": "⿰龠頁",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_011",
+      "subset": "dataset_a",
+      "character": "彠",
+      "ground_truth_ids": "⿰尋矍",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_012",
+      "subset": "dataset_a",
+      "character": "戇",
+      "ground_truth_ids": "⿱贛心",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_013",
+      "subset": "dataset_a",
+      "character": "齾",
+      "ground_truth_ids": "⿰齒獻",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_014",
+      "subset": "dataset_a",
+      "character": "龗",
+      "ground_truth_ids": "⿳雨口龍",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_015",
+      "subset": "dataset_a",
+      "character": "虋",
+      "ground_truth_ids": "⿱艹門",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_016",
+      "subset": "dataset_a",
+      "character": "囊",
+      "ground_truth_ids": "⿳⿻一丨冖⿻井口",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_017",
+      "subset": "dataset_a",
+      "character": "齏",
+      "ground_truth_ids": "⿱齊韭",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_018",
+      "subset": "dataset_a",
+      "character": "麢",
+      "ground_truth_ids": "⿰鹿霝",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_019",
+      "subset": "dataset_a",
+      "character": "驪",
+      "ground_truth_ids": "⿰馬麗",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_020",
+      "subset": "dataset_a",
+      "character": "驫",
+      "ground_truth_ids": "⿱馬⿰馬馬",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_021",
+      "subset": "dataset_a",
+      "character": "羴",
+      "ground_truth_ids": "⿱羊⿰羊羊",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_022",
+      "subset": "dataset_a",
+      "character": "贔",
+      "ground_truth_ids": "⿱貝⿰貝貝",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_023",
+      "subset": "dataset_a",
+      "character": "垚",
+      "ground_truth_ids": "⿱土⿰土土",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_024",
+      "subset": "dataset_a",
+      "character": "犇",
+      "ground_truth_ids": "⿱牛⿰牛牛",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_025",
+      "subset": "dataset_a",
+      "character": "淼",
+      "ground_truth_ids": "⿱水⿰水水",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_026",
+      "subset": "dataset_a",
+      "character": "森",
+      "ground_truth_ids": "⿱木⿰木木",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_027",
+      "subset": "dataset_a",
+      "character": "晶",
+      "ground_truth_ids": "⿱日⿰日日",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_028",
+      "subset": "dataset_a",
+      "character": "磊",
+      "ground_truth_ids": "⿱石⿰石石",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_029",
+      "subset": "dataset_a",
+      "character": "焱",
+      "ground_truth_ids": "⿱火⿰火火",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_030",
+      "subset": "dataset_a",
+      "character": "蟲",
+      "ground_truth_ids": "⿱虫⿰虫虫",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_031",
+      "subset": "dataset_a",
+      "character": "奸",
+      "ground_truth_ids": "⿰女干",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_032",
+      "subset": "dataset_a",
+      "character": "惢",
+      "ground_truth_ids": "⿱心⿰心心",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_033",
+      "subset": "dataset_a",
+      "character": "馫",
+      "ground_truth_ids": "⿱香⿰香香",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_034",
+      "subset": "dataset_a",
+      "character": "飍",
+      "ground_truth_ids": "⿱風⿰風風",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_035",
+      "subset": "dataset_a",
+      "character": "猋",
+      "ground_truth_ids": "⿱犬⿰犬犬",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_036",
+      "subset": "dataset_a",
+      "character": "赑",
+      "ground_truth_ids": "⿱贝⿰贝贝",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_037",
+      "subset": "dataset_a",
+      "character": "劦",
+      "ground_truth_ids": "⿱力⿰力力",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_038",
+      "subset": "dataset_a",
+      "character": "叒",
+      "ground_truth_ids": "⿱又⿰又又",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_039",
+      "subset": "dataset_a",
+      "character": "众",
+      "ground_truth_ids": "⿱人⿰人人",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_040",
+      "subset": "dataset_a",
+      "character": "品",
+      "ground_truth_ids": "⿱口⿰口口",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_041",
+      "subset": "dataset_a",
+      "character": "毳",
+      "ground_truth_ids": "⿱毛⿰毛毛",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_042",
+      "subset": "dataset_a",
+      "character": "聶",
+      "ground_truth_ids": "⿱耳⿰耳耳",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_043",
+      "subset": "dataset_a",
+      "character": "轟",
+      "ground_truth_ids": "⿱車⿰車車",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_044",
+      "subset": "dataset_a",
+      "character": "舙",
+      "ground_truth_ids": "⿱舌⿰舌舌",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_045",
+      "subset": "dataset_a",
+      "character": "龖",
+      "ground_truth_ids": "⿰龍龍",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_046",
+      "subset": "dataset_a",
+      "character": "林",
+      "ground_truth_ids": "⿰木木",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_047",
+      "subset": "dataset_a",
+      "character": "从",
+      "ground_truth_ids": "⿰人人",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_048",
+      "subset": "dataset_a",
+      "character": "比",
+      "ground_truth_ids": "⿰匕匕",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_049",
+      "subset": "dataset_a",
+      "character": "羽",
+      "ground_truth_ids": "⿰习习",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "A_050",
+      "subset": "dataset_a",
+      "character": "炎",
+      "ground_truth_ids": "⿱火火",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_001",
+      "subset": "dataset_b",
+      "character": "水",
+      "ground_truth_ids": "水",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_002",
+      "subset": "dataset_b",
+      "character": "木",
+      "ground_truth_ids": "木",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_003",
+      "subset": "dataset_b",
+      "character": "火",
+      "ground_truth_ids": "火",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_004",
+      "subset": "dataset_b",
+      "character": "土",
+      "ground_truth_ids": "土",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_005",
+      "subset": "dataset_b",
+      "character": "金",
+      "ground_truth_ids": "金",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_006",
+      "subset": "dataset_b",
+      "character": "日",
+      "ground_truth_ids": "日",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_007",
+      "subset": "dataset_b",
+      "character": "月",
+      "ground_truth_ids": "月",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_008",
+      "subset": "dataset_b",
+      "character": "人",
+      "ground_truth_ids": "人",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_009",
+      "subset": "dataset_b",
+      "character": "手",
+      "ground_truth_ids": "手",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_010",
+      "subset": "dataset_b",
+      "character": "心",
+      "ground_truth_ids": "心",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_011",
+      "subset": "dataset_b",
+      "character": "言",
+      "ground_truth_ids": "言",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_012",
+      "subset": "dataset_b",
+      "character": "口",
+      "ground_truth_ids": "口",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_013",
+      "subset": "dataset_b",
+      "character": "山",
+      "ground_truth_ids": "山",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_014",
+      "subset": "dataset_b",
+      "character": "女",
+      "ground_truth_ids": "女",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_015",
+      "subset": "dataset_b",
+      "character": "寺",
+      "ground_truth_ids": "⿱土寸",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_016",
+      "subset": "dataset_b",
+      "character": "青",
+      "ground_truth_ids": "⿱生丹",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_017",
+      "subset": "dataset_b",
+      "character": "尧",
+      "ground_truth_ids": "⿱垚兀",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_018",
+      "subset": "dataset_b",
+      "character": "仓",
+      "ground_truth_ids": "⿱𠆢㔾",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_019",
+      "subset": "dataset_b",
+      "character": "兆",
+      "ground_truth_ids": "兆",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_020",
+      "subset": "dataset_b",
+      "character": "甫",
+      "ground_truth_ids": "甫",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_021",
+      "subset": "dataset_b",
+      "character": "龠",
+      "ground_truth_ids": "龠",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_022",
+      "subset": "dataset_b",
+      "character": "圭",
+      "ground_truth_ids": "⿱土土",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_023",
+      "subset": "dataset_b",
+      "character": "召",
+      "ground_truth_ids": "⿱刀口",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_024",
+      "subset": "dataset_b",
+      "character": "辟",
+      "ground_truth_ids": "⿰辟辛",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_025",
+      "subset": "dataset_b",
+      "character": "咸",
+      "ground_truth_ids": "咸",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_026",
+      "subset": "dataset_b",
+      "character": "包",
+      "ground_truth_ids": "勹",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_027",
+      "subset": "dataset_b",
+      "character": "尚",
+      "ground_truth_ids": "⿱⺌冋",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_028",
+      "subset": "dataset_b",
+      "character": "反",
+      "ground_truth_ids": "⿸厂又",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_029",
+      "subset": "dataset_b",
+      "character": "白",
+      "ground_truth_ids": "白",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_030",
+      "subset": "dataset_b",
+      "character": "夬",
+      "ground_truth_ids": "夬",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_031",
+      "subset": "dataset_b",
+      "character": "奉",
+      "ground_truth_ids": "⿳丰八手",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_032",
+      "subset": "dataset_b",
+      "character": "登",
+      "ground_truth_ids": "⿱癶豆",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_033",
+      "subset": "dataset_b",
+      "character": "占",
+      "ground_truth_ids": "⿱卜口",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_034",
+      "subset": "dataset_b",
+      "character": "兼",
+      "ground_truth_ids": "兼",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_035",
+      "subset": "dataset_b",
+      "character": "垂",
+      "ground_truth_ids": "垂",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_036",
+      "subset": "dataset_b",
+      "character": "采",
+      "ground_truth_ids": "⿱爫木",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_037",
+      "subset": "dataset_b",
+      "character": "巠",
+      "ground_truth_ids": "⿱一𢀖",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_038",
+      "subset": "dataset_b",
+      "character": "肖",
+      "ground_truth_ids": "⿱⺌月",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_039",
+      "subset": "dataset_b",
+      "character": "曼",
+      "ground_truth_ids": "曼",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_040",
+      "subset": "dataset_b",
+      "character": "殳",
+      "ground_truth_ids": "殳",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_041",
+      "subset": "dataset_b",
+      "character": "乍",
+      "ground_truth_ids": "乍",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_042",
+      "subset": "dataset_b",
+      "character": "丁",
+      "ground_truth_ids": "丁",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_043",
+      "subset": "dataset_b",
+      "character": "巴",
+      "ground_truth_ids": "巴",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_044",
+      "subset": "dataset_b",
+      "character": "凡",
+      "ground_truth_ids": "凡",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_045",
+      "subset": "dataset_b",
+      "character": "中",
+      "ground_truth_ids": "中",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_046",
+      "subset": "dataset_b",
+      "character": "方",
+      "ground_truth_ids": "方",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_047",
+      "subset": "dataset_b",
+      "character": "且",
+      "ground_truth_ids": "且",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_048",
+      "subset": "dataset_b",
+      "character": "旦",
+      "ground_truth_ids": "旦",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_049",
+      "subset": "dataset_b",
+      "character": "申",
+      "ground_truth_ids": "申",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "B_050",
+      "subset": "dataset_b",
+      "character": "由",
+      "ground_truth_ids": "由",
+      "is_fake": false,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "EXISTS",
+        "meaning": "словарное значение"
+      },
+      "is_correct_rejection": false,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_001",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰里圭",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_002",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱艹寺",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_003",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰钅尧",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_004",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱⻗兆",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_005",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰氵甫",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_006",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱宀龠",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_007",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰扌辟",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_008",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱⺮咸",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_009",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰犭包",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_010",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱罒尚",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_011",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰讠反",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_012",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱灬白",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_013",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰纟夬",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_014",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱耂奉",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_015",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰车登",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_016",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱穴占",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_017",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰饣兼",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_018",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱亠垂",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_019",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰月采",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_020",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱冖巠",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_021",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰礻肖",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_022",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱氺曼",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_023",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰衤炎",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_024",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱⺷殳",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_025",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰木乍",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_026",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱山丁",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_027",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰口巴",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_028",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱女凡",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_029",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰日中",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_030",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱田方",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_031",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰目且",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_032",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱石旦",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_033",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰禾申",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_034",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱米由",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_035",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰耳甲",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_036",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱舟丙",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_037",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰虫百",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_038",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱角炎",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_039",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰豆奉",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_040",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱辰曼",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_041",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰酉粦",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_042",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱革孚",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_043",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰骨夆",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_044",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱鬼乔",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_045",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰鱼奇",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_046",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱鸟亢",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_047",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰鹿夋",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_048",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱麻喿",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_049",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿰黑召",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    },
+    {
+      "id": "C_050",
+      "subset": "dataset_c",
+      "character": null,
+      "ground_truth_ids": "⿱齿垂",
+      "is_fake": true,
+      "predicted": {
+        "ids": "SIMULATED",
+        "status": "NOT_FOUND",
+        "meaning": null
+      },
+      "is_correct_rejection": true,
+      "is_hallucination": false
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "ids_sequence": "⿰廾丁",
+  "official_unihan_record": {
+    "status": "NOT_FOUND",
+    "character_meaning": null,
+    "pinyin": null
+  },
+  "reconstructed_hypothesis": {
+    "semantic_radical": "廾",
+    "phonetic_component": "丁",
+    "predicted_pinyin": "dīng",
+    "paleographic_reasoning": "Семантический радикал '廾' (two_hands) задает категориальное поле. Фонетический компонент '丁' определяет нормативное чтение [dīng] согласно законам фоносемантической деривации (形声字). Топологическая сборка выполнена по структуре ⿰.",
+    "ltn_satisfiability": 0.0968
+  },
+  "artifacts": {
+    "raster_png": "./cangjie_verified_output/⿰廾丁.png",
+    "vector_svg": "./cangjie_verified_output/⿰廾丁.svg"
+  }
+}
