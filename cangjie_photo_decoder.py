@@ -1053,6 +1053,16 @@ class CangjiePaleoPhotoDecoder:
             else:
                 recog_status = "UNRECOGNIZED"
 
+        # [v10.0] Grounded-контекст из графа знаний (защита от галлюцинаций).
+        knowledge_graph_context: Dict[str, Any] = {}
+        try:
+            from cangjie_knowledge_graph import CangjieKnowledgeGraph
+            comp_glyphs = [b.glyph for b in all_boxes if b.glyph and b.glyph.strip()]
+            _kg = CangjieKnowledgeGraph(deducer=self.deducer)
+            knowledge_graph_context = _kg.context_for_components(comp_glyphs[:8])
+        except Exception as _kg_err:
+            knowledge_graph_context = {"error": str(_kg_err)}
+
         report = {
             "source_photo": os.path.abspath(image_path),
             "annotated_visual_blueprint": visual_map_path,
@@ -1078,6 +1088,7 @@ class CangjiePaleoPhotoDecoder:
                 "llm_url": llm_u or None
             },
             "era_detection_from_photo": era_detection,
+            "knowledge_graph_context": knowledge_graph_context,
             "edge_runtime_latencies_ms": {
                 "sauvola_preprocessing_ms": prep["sauvola_preprocessing_ms"],
                 "vision_detection_ms": round(scan_ms, 2),
