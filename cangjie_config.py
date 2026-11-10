@@ -73,6 +73,7 @@ class CangjieConfig:
     detector: DetectorConfig = field(default_factory=DetectorConfig)
     matcher: MatcherConfig = field(default_factory=MatcherConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
+    api_key: str = ""  # пусто = аутентификация выключена
 
     # --- сериализация -------------------------------------------------
     def to_dict(self) -> Dict[str, Any]:
@@ -81,6 +82,7 @@ class CangjieConfig:
             "detector": asdict(self.detector),
             "matcher": asdict(self.matcher),
             "llm": asdict(self.llm),
+            "api_key": self.api_key,
         }
 
     @classmethod
@@ -102,6 +104,7 @@ class CangjieConfig:
                 model=str(llm.get("model", "")),
                 url=str(llm.get("url", "")),
             ),
+            api_key=str(d.get("api_key", "")),
         )
 
     # --- машина --------------------------------------------------------

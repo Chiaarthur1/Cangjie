@@ -2982,6 +2982,13 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
     workstation: Optional[ProductionPaleoWorkstationEngine] = None
     cached_html: str = ""
 
+    def _auth_ok(self) -> bool:
+        """Опциональная аутентификация по X-API-Key (если api_key пуст — выключена)."""
+        key = getattr(self.workstation.photo_decoder.config, "api_key", "")
+        if not key:
+            return True
+        return self.headers.get("X-API-Key", "") == key
+
     def do_GET(self):
         if self.path == "/" or self.path.startswith("/index.html"):
             body = self.cached_html.encode("utf-8")
@@ -3066,6 +3073,14 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
+        if not self._auth_ok():
+            body = json.dumps({"error": "unauthorized: неверный X-API-Key"}, ensure_ascii=False).encode("utf-8")
+            self.send_response(401)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if self.path.startswith("/api/ab"):
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
