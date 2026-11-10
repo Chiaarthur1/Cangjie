@@ -477,17 +477,18 @@ def run_self_verification(
     )
     assert grpo_step["group_advantages"][0] > 1.0 and grpo_step["group_advantages"][2] < -1.0
 
-    student_ckpt_path = "./data/cangjie_student_rkl_grpo_weights.npz"
+    student_ckpt_path = "./data/cangjie_student_rkl_grpo_sanity_state.npz"
     np.savez_compressed(
         student_ckpt_path,
         student_logits_refined=student_logits,
         teacher_logits=teacher_logits,
         group_advantages=grpo_step["group_advantages"],
-        policy_ratios=grpo_step["policy_ratios"]
+        policy_ratios=grpo_step["policy_ratios"],
+        is_self_test=np.array([1], dtype=np.int8)
     )
     print(
-        f"✅ [3/3] GRPO Оптимизатор: награды [{r1}, {r2}, {r3}], преимущество лидера A_1 = +{grpo_step['group_advantages'][0]:.3f}, "
-        f"L_GRPO = {grpo_step['grpo_loss']:.4f} | Чекпоинт весов: {student_ckpt_path}"
+        f"✅ [3/3] GRPO Оптимизатор (self-test): награды [{r1}, {r2}, {r3}], преимущество лидера A_1 = +{grpo_step['group_advantages'][0]:.3f}, "
+        f"L_GRPO = {grpo_step['grpo_loss']:.4f} | sanity-state (НЕ обученные веса студента): {student_ckpt_path}"
     )
     print("=" * 78)
     return {
@@ -495,7 +496,7 @@ def run_self_verification(
         "rkl_loss_initial": round(rkl_initial["loss_reverse_kl"], 4),
         "rkl_loss_final": round(rkl_final["loss_reverse_kl"], 4),
         "grpo_loss": round(grpo_step["grpo_loss"], 4),
-        "checkpoint": student_ckpt_path
+        "sanity_state": student_ckpt_path
     }
 
 

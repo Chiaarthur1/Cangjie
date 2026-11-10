@@ -235,7 +235,8 @@ class ProductionPaleoWorkstationEngine:
             "baxter_count": len(self.deducer.engine.phonetic_glyphs),
             "transitive_xiesheng_count": len(getattr(self.deducer, "transitive_baxter_map", {})),
             "skeletons_count": len(self.degradation_pipe.repo.medians) or 9574,
-            "cached_expressions": len(self._analysis_cache)
+            "cached_expressions": len(self._analysis_cache),
+            "model_config": self.photo_decoder.config.to_dict()
         }
 
     def _compute_real_component_boxes(self, main_op: str, comps: List[str]) -> List[Tuple[str, BoundingBox]]:
@@ -556,7 +557,12 @@ class ProductionPaleoWorkstationEngine:
         raw_bytes: bytes,
         filename: str = "upload.png",
         strokes: Optional[List[List[Tuple[float, float]]]] = None,
-        stamped_nodes: Optional[List[Dict[str, Any]]] = None
+        stamped_nodes: Optional[List[Dict[str, Any]]] = None,
+        detector_backend: Optional[str] = None,
+        matcher_backend: Optional[str] = None,
+        llm_backend: Optional[str] = None,
+        llm_model: Optional[str] = None,
+        llm_url: Optional[str] = None
     ) -> Dict[str, Any]:
         suffix = os.path.splitext(filename)[1] or ".png"
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
@@ -568,7 +574,12 @@ class ProductionPaleoWorkstationEngine:
                 tmp_path,
                 output_dir=tempfile.gettempdir(),
                 strokes=strokes,
-                stamped_nodes=stamped_nodes
+                stamped_nodes=stamped_nodes,
+                detector_backend=detector_backend,
+                matcher_backend=matcher_backend,
+                llm_backend=llm_backend,
+                llm_model=llm_model,
+                llm_url=llm_url
             )
             uploaded_pil = Image.open(io.BytesIO(raw_bytes)).convert("RGB").resize((self.resolution, self.resolution))
             uploaded_b64 = self._pil_to_base64(uploaded_pil)
@@ -607,7 +618,10 @@ class ProductionPaleoWorkstationEngine:
             ]
             res["valency_trace"] = rep["layout_to_tree_valency_trace"]
             if not dossiers:
-                dossiers = [res]
+                # Кладём КОПИЮ, а не сам res — иначе возникает циклическая ссылка
+                # (res -> multi_glyph_dossiers -> [res]) и json.dumps падает.
+                import copy
+                dossiers = [copy.deepcopy(res)]
             res["multi_glyph_dossiers"] = dossiers
             res["multi_glyph_count"] = len(dossiers)
             res["full_scroll_query"] = " ".join(d["matched_canonical_char"] or d["query_ids"] for d in dossiers)
@@ -1738,6 +1752,49 @@ def build_production_studio_html(
             <input type="file" id="photoUploadInput" accept="image/*" style="display:none;" onchange="uploadPhotoArtifact(this)" />
           </div>
 
+          <!-- [v9.7] Выбор модели распознавания -->
+          <div class="dossier-section">
+            <div class="sec-tag">🎛️ Выбор модели (детектор / матчер / LLM)</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:11px; color:var(--text-silver);">Детектор</label>
+                <select id="modelDetectorSel" class="search-input" style="width:120px;">
+                  <option value="auto">auto</option>
+                  <option value="pixel" selected>pixel</option>
+                  <option value="rtdetr">rtdetr</option>
+                  <option value="yolo">yolo</option>
+                  <option value="none">none</option>
+                </select>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:11px; color:var(--text-silver);">Матчер</label>
+                <select id="modelMatcherSel" class="search-input" style="width:130px;">
+                  <option value="chamfer_hog" selected>chamfer_hog</option>
+                  <option value="embedding">embedding</option>
+                </select>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:11px; color:var(--text-silver);">LLM</label>
+                <select id="modelLlmSel" class="search-input" style="width:110px;">
+                  <option value="none" selected>none</option>
+                  <option value="ollama">ollama</option>
+                  <option value="vllm">vllm</option>
+                </select>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:11px; color:var(--text-silver);">Модель LLM</label>
+                <input type="text" id="modelLlmNameInput" class="search-input" placeholder="qwen2.5:7b" style="width:130px;" />
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:11px; color:var(--text-silver);">URL LLM</label>
+                <input type="text" id="modelLlmUrlInput" class="search-input" placeholder="http://localhost:11434" style="width:170px;" />
+              </div>
+            </div>
+            <div style="font-size:11.5px; color:var(--text-muted); margin-top:6px;">
+              pixel / chamfer_hog работают всегда (без GPU и весов). rtdetr / yolo / embedding требуют обученных весов; при их отсутствии система честно переключается на pixel / chamfer_hog.
+            </div>
+          </div>
+
           <!-- Превью бинаризации и найденных иероглифов на фото -->
           <div class="dossier-section highlight-gold">
             <div class="sec-tag">🔬 Статус оптического сканера и мульти-сегментации снимка</div>
@@ -2374,6 +2431,7 @@ def build_production_studio_html(
 
     async function sendBase64PhotoToServer(dataUrl, filename, strokesData, stampsData) {{
       const b64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+      const sel = (id) => (document.getElementById(id) ? document.getElementById(id).value : '');
       try {{
         const resp = await fetch('/api/decode_photo', {{
           method: 'POST',
@@ -2382,7 +2440,12 @@ def build_production_studio_html(
             filename: filename || 'artifact.png',
             image_base64: b64,
             strokes: strokesData || null,
-            stamped_nodes: stampsData || null
+            stamped_nodes: stampsData || null,
+            detector: sel('modelDetectorSel'),
+            matcher: sel('modelMatcherSel'),
+            llm: sel('modelLlmSel'),
+            llm_model: sel('modelLlmNameInput'),
+            llm_url: sel('modelLlmUrlInput')
           }})
         }});
         if (resp.ok) {{
@@ -2658,31 +2721,65 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif self.path.startswith("/api/config"):
+            from cangjie_config import DETECTOR_BACKENDS, MATCHER_BACKENDS, LLM_BACKENDS
+            cfg = self.workstation.photo_decoder.config
+            body = json.dumps({
+                "config": cfg.to_dict(),
+                "choices": {
+                    "detector": list(DETECTOR_BACKENDS),
+                    "matcher": list(MATCHER_BACKENDS),
+                    "llm": list(LLM_BACKENDS)
+                }
+            }, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
         else:
             self.send_response(404)
             self.end_headers()
 
     def do_POST(self):
         if self.path.startswith("/api/decode_photo"):
-            length = int(self.headers.get("Content-Length", "0"))
-            raw_body = self.rfile.read(length)
-            payload = json.loads(raw_body.decode("utf-8"))
-            img_bytes = base64.b64decode(payload["image_base64"])
-            fname = payload.get("filename", "artifact.png")
-            strokes = payload.get("strokes")
-            stamped_nodes = payload.get("stamped_nodes")
-            res = self.workstation.decode_uploaded_photo_bytes(
-                img_bytes,
-                filename=fname,
-                strokes=strokes,
-                stamped_nodes=stamped_nodes
-            )
-            body = json.dumps(res, ensure_ascii=False).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                raw_body = self.rfile.read(length)
+                payload = json.loads(raw_body.decode("utf-8"))
+                img_bytes = base64.b64decode(payload["image_base64"])
+                fname = payload.get("filename", "artifact.png")
+                strokes = payload.get("strokes")
+                stamped_nodes = payload.get("stamped_nodes")
+                detector = payload.get("detector")
+                matcher = payload.get("matcher")
+                llm = payload.get("llm")
+                llm_model = payload.get("llm_model")
+                llm_url = payload.get("llm_url")
+                res = self.workstation.decode_uploaded_photo_bytes(
+                    img_bytes,
+                    filename=fname,
+                    strokes=strokes,
+                    stamped_nodes=stamped_nodes,
+                    detector_backend=detector,
+                    matcher_backend=matcher,
+                    llm_backend=llm,
+                    llm_model=llm_model,
+                    llm_url=llm_url
+                )
+                body = json.dumps(res, ensure_ascii=False).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception as e:
+                err = json.dumps({"error": str(e), "endpoint": "/api/decode_photo"}, ensure_ascii=False).encode("utf-8")
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.end_headers()
+                self.wfile.write(err)
         else:
             self.send_response(404)
             self.end_headers()

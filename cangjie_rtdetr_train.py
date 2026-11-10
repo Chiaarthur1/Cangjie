@@ -192,8 +192,14 @@ class RTDETRClusterEngine:
                         lf.write(f"{cid} {cx:.6f} {cy:.6f} {w:.6f} {h:.6f}\n")
 
         names_lines = [f"  {idx}: '{item[1]} ({item[5]})'" for idx, item in enumerate(KANGXI_214_COMPREHENSIVE_CATALOG)]
+        # [v9.7] path: "." вместо абсолютного пути.
+        #   Абсолютный путь (ds_root) привязывал датасет к машине, на
+        #   которой он был сгенерирован: перенос проекта на другую
+        #   машину ломал обучение ("train directory not found").
+        #   Ultralytics корректно разрешает относительный path относительно
+        #   расположения самого data.yaml.
         yaml_text = (
-            f"path: {ds_root}\n"
+            f"path: .\n"
             f"train: images/train\n"
             f"val: images/val\n"
             f"nc: 214\n"
@@ -301,20 +307,22 @@ class RTDETRClusterEngine:
                 layer_bin_logits[l_i][m_q] -= 2.4 * fgl_grads[l_i]
                 
         elapsed_s = time.perf_counter() - t0
-        ckpt_path = os.path.join(self.data_dir, "cangjie_dfine_rtdetr_checkpoint.npz")
+        ckpt_path = os.path.join(self.data_dir, "cangjie_dfine_loss_sanity_state.npz")
         if save_checkpoint:
             np.savez_compressed(
                 ckpt_path,
                 refined_boxes=all_pred_boxes,
                 pred_cls_logits=pred_cls_logits,
                 decoder_bin_logits_L=layer_bin_logits[-1],
-                msda_elliptical_grid=self.msda.base_elliptical_grid
+                msda_elliptical_grid=self.msda.base_elliptical_grid,
+                is_sanity_state=np.array([1], dtype=np.int8)
             )
 
         logger.info(
             f"✅ Оптимизация композитного лосса D-FINE завершена за {elapsed_s:.2f} с ({steps} эпох/шагов): "
             f"L_total {history[0]['loss_total']:.4f} -> {history[-1]['loss_total']:.4f} | "
-            f"NWD {history[0]['mean_matched_nwd']:.4f} -> {history[-1]['mean_matched_nwd']:.4f} | Чекпоинт: {ckpt_path}"
+            f"NWD {history[0]['mean_matched_nwd']:.4f} -> {history[-1]['mean_matched_nwd']:.4f} | "
+            f"sanity-state (НЕ веса детектора): {ckpt_path}"
         )
         return {
             "steps": history,

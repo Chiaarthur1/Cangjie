@@ -29,7 +29,18 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional, Any
 from PIL import Image, ImageDraw
 import numpy as np
-import cv2
+
+# OpenCV опционален: если его нет — используется совместимый NumPy-шим
+# (cangjie_cv2_compat). Раньше `import cv2` был жестким, и падал ВЕСЬ импорт
+# модуля, а вместе с ним — деградации, рендера и UI-студии, хотя семантичес-
+# кая дедукция OpenCV не нужна вообще.
+try:
+    import cv2  # type: ignore
+    HAS_REAL_CV2 = True
+except ImportError:  # pragma: no cover
+    from cangjie_cv2_compat import *  # noqa: F401,F403
+    from cangjie_cv2_compat import HAS_REAL_CV2
+    import cangjie_cv2_compat as cv2
 
 from cangjie_benchmark_forge import (
     KANGXI_214_COMPREHENSIVE_CATALOG,

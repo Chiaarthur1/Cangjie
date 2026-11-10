@@ -30,9 +30,15 @@ from PIL import Image
 try:
     import cv2
     HAS_CV2 = True
+    HAS_CV2_FALLBACK = False
 except ImportError:
-    cv2 = None
+    # Fallback на чистый NumPy: раньше cv2=None приводил к тому, что часть
+    # функций молча возвращала заглушки, а часть падала. Shim дает рабочие
+    # аналоги distanceTransform/GaussianBlur/Sobel без внешней зависимости.
+    from cangjie_cv2_compat import *  # noqa: F401,F403
+    import cangjie_cv2_compat as cv2
     HAS_CV2 = False
+    HAS_CV2_FALLBACK = True
 
 try:
     import onnxruntime as ort

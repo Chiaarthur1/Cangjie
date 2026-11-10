@@ -291,6 +291,11 @@ class ProjectCangjieEngine:
             oc_col = field_map.get("old_chinese") or field_map.get("oc")
             gsr_col = field_map.get("gsr")
             gloss_col = field_map.get("gloss") or field_map.get("meaning")
+            # [PHONO-REPAIR v1.0] Колонка чтения ФОНЕТИКА серии: нужна, чтобы
+            # для НЕСУЩЕСТВУЮЩИХ знаков выводить звучание по гнезду Сэшэн,
+            # а для засвидетельствованных — собственное чтение знака.
+            series_py_col = field_map.get("series_pinyin")
+            bs_py_col = field_map.get("bs_pinyin")
 
             if not char_col:
                 logger.error("В Baxter_Sagart.csv не найдена колонка знака.")
@@ -304,6 +309,8 @@ class ProjectCangjieEngine:
 
                 rec = {
                     "pinyin": row.get(py_col, "").strip() if py_col else "",
+                    "bs_pinyin": row.get(bs_py_col, "").strip() if bs_py_col else "",
+                    "series_pinyin": row.get(series_py_col, "").strip() if series_py_col else "",
                     "middle_chinese": row.get(mc_col, "").strip() if mc_col else "",
                     "old_chinese": row.get(oc_col, "").strip() if oc_col else "",
                     "gsr": row.get(gsr_col, "").strip() if gsr_col else "",
@@ -401,8 +408,16 @@ class ProjectCangjieEngine:
                 cand_ent = self.characters_db.get(cand)
                 if cand_ent and cand_ent.baxter_sagart and cand_ent.baxter_sagart.get("primary"):
                     src_rec = cand_ent.baxter_sagart["primary"]
+                    # [PHONO-REPAIR v1.0] Чтение САМОГО знака НЕ наследуется
+                    # от фонетика: 形声 даёт знаку СЕМЬЮ по фонетику, но чтение
+                    # знак наследует лишь ЧАСТИЧНО (河 hé ≠ 可 kě). Наследуются
+                    # только архетип серии (MC/OC) и код ГСР; `pinyin` берётся
+                    # из Unihan/Бакстера-Сагарта, а если его нет — остаётся
+                    # пустым, и движок честно помечает чтение как неизвестное.
                     inherited = {
-                        "pinyin": src_rec.get("pinyin", ""),
+                        "pinyin": "",
+                        "own_pinyin": "",
+                        "series_pinyin": src_rec.get("pinyin", ""),
                         "middle_chinese": src_rec.get("middle_chinese", ""),
                         "old_chinese": src_rec.get("old_chinese", ""),
                         "gsr": f"{src_rec.get('gsr', 'XIESHENG')}->{cand}",

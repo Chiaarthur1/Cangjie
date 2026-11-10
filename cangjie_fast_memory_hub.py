@@ -250,9 +250,14 @@ class CangjieFastMemoryHub:
                 phon_cand = comps[-1] if main_op in {"⿰", "⿱", "⿸", "⿺", "⿵", "⿴"} else comps[0]
                 if phon_cand in base_baxter:
                     parent_bs = base_baxter[phon_cand]
+                    # [PHONO-REPAIR v1.0] `pinyin` — СВОЁ чтение знака (Unihan),
+                    # а не чтение фонетика. Чтение серии хранится отдельно
+                    # в `series_pinyin`, чтобы палеограф видел разницу явно.
                     transitive_baxter[glyph] = {
                         "phonetic_root": phon_cand,
-                        "pinyin": gl.get("pinyin") or parent_bs["pinyin"],
+                        "pinyin": gl.get("pinyin", ""),
+                        "own_pinyin": gl.get("pinyin", ""),
+                        "series_pinyin": parent_bs["pinyin"],
                         "old_chinese": parent_bs["old_chinese"],
                         "middle_chinese": gl.get("tang_mc") or parent_bs["middle_chinese"],
                         "gsr": parent_bs["gsr"],

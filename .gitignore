@@ -15,3 +15,6 @@ cmake-build-*/
 *.db
 datasets/
 data/raw/
+cangjie_config.json
+data/cangjie_paleo_templates_*.npz
+data/cangjie_fullchar_templates_*.npz

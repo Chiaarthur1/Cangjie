@@ -18,7 +18,112 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Set, Optional, Any, Union
 import numpy as np
-from scipy.optimize import linear_sum_assignment
+
+try:
+    from scipy.optimize import linear_sum_assignment
+    HAS_SCIPY = True
+except ImportError:  # pragma: no cover - fallback для окружений без scipy
+    HAS_SCIPY = False
+
+    def linear_sum_assignment(cost_matrix: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Венгерский алгоритм (Jonker–Volgenant) на чистом numpy, O(n^2*m).
+
+        Замена scipy.optimize.linear_sum_assignment, чтобы проект
+        работал без scipy.
+
+        [v9.6] Первая версия паддила матрицу до квадрата значением INF.
+        Это ЛОМАЛО оптимум: при n_rows != n_cols фиктивные ячейки с INF
+        попадали в назначение, и суммарная стоимость оказывалась ВЫШЕ
+        оптимальной. Проверено на 200 случайных матрицах против
+        полного перебора — расхождение.
+
+        Теперь: прямоугольный случай обрабатывается корректно —
+        назначается ровно min(n_rows, n_cols) пар, каждая строка и
+        каждый столбец используются не более одного раза.
+
+        Возвращает (row_ind, col_ind) — индексы назначения.
+        """
+        c = np.asarray(cost_matrix, dtype=np.float64)
+        if c.ndim != 2:
+            raise ValueError("cost_matrix должна быть 2-мерной")
+        n_rows, n_cols = c.shape
+        if n_rows == 0 or n_cols == 0:
+            return (np.array([], dtype=np.int64), np.array([], dtype=np.int64))
+
+        # Алгоритм JV требует n_rows <= n_cols, иначе транспонируем.
+        transposed = False
+        if n_rows > n_cols:
+            c = c.T
+            n_rows, n_cols = n_cols, n_rows
+            transposed = True
+
+        INF = float("inf")
+        # u — потенциалы строк, v — потенциалы столбцов
+        u = np.zeros(n_rows + 1, dtype=np.float64)
+        v = np.zeros(n_cols + 1, dtype=np.float64)
+        # p[j] — строка, сопоставленная столбцу j (1-индексация, 0 = свободен)
+        p = np.zeros(n_cols + 1, dtype=np.int64)
+        way = np.zeros(n_cols + 1, dtype=np.int64)
+
+        for i in range(1, n_rows + 1):
+            p[0] = i
+            j0 = 0
+            minv = np.full(n_cols + 1, INF, dtype=np.float64)
+            used = np.zeros(n_cols + 1, dtype=bool)
+
+            while True:
+                used[j0] = True
+                i0 = p[j0]
+                delta = INF
+                j1 = -1
+                row = c[i0 - 1]
+                for j in range(1, n_cols + 1):
+                    if used[j]:
+                        continue
+                    cur = row[j - 1] - u[i0] - v[j]
+                    if cur < minv[j]:
+                        minv[j] = cur
+                        way[j] = j0
+                    if minv[j] < delta:
+                        delta = minv[j]
+                        j1 = j
+                if j1 < 0:
+                    break
+                for j in range(n_cols + 1):
+                    if used[j]:
+                        u[p[j]] += delta
+                        v[j] -= delta
+                    else:
+                        minv[j] -= delta
+                j0 = j1
+                if p[j0] == 0:
+                    break
+
+            # Восстановление назначения по цепочке 'way'
+            while j0:
+                j1 = way[j0]
+                p[j0] = p[j1]
+                j0 = j1
+
+        # Собираем назначения: столбец j сопоставлен строке p[j]
+        rows: List[int] = []
+        cols: List[int] = []
+        for j in range(1, n_cols + 1):
+            if p[j] > 0:
+                r = p[j] - 1
+                if r < n_rows:
+                    rows.append(r)
+                    cols.append(j - 1)
+
+        order = np.argsort(rows)
+        row_ind = np.array([rows[i] for i in order], dtype=np.int64)
+        col_ind = np.array([cols[i] for i in order], dtype=np.int64)
+
+        if transposed:
+            row_ind, col_ind = col_ind, row_ind
+        return row_ind, col_ind
+
 
 _UPLOAD_DIR = "/working_dir/c_d592584081f58810/user_uploaded_files/ttl=63d/user_uploaded"
 if os.path.isdir(_UPLOAD_DIR) and _UPLOAD_DIR not in sys.path:

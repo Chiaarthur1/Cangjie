@@ -507,6 +507,19 @@ class CangjieMeaningDeducer:
         return q, applied
 
     def _lookup_component_phonology(self, comp: str) -> Tuple[str, str, str]:
+        """
+        Возвращает (пиньинь, OC-архетип, смысловая подпись) для УЗЛА.
+
+        [PHONO-REPAIR v1.0] ПРИОРИТЕТ ИСТОЧНИКОВ:
+            1) PHONETIC_CO_SEMANTICS / ATOMIC_CHAR_DECOMPOSITIONS — вручную
+               выверенные записи (для 49 + 20 ключевых узлов).
+            2) Unihan-глосса (kMandarin) — нормативное СВОЁ чтение знака.
+            3) Запись движка (Baxter-Sagart) — MC/OC архетип.
+            4) Транзитивная запись Сэшэн.
+
+        Раньше запись движка стояла ВЫШЕ глоссы, из-за чего знак получал
+        чтение чужого компонента (沃 -> piě вместо wò).
+        """
         if comp in PHONETIC_CO_SEMANTICS:
             return PHONETIC_CO_SEMANTICS[comp]
 
@@ -514,24 +527,33 @@ class CangjieMeaningDeducer:
             _, _, _, py_a, oc_a, gloss_a = ATOMIC_CHAR_DECOMPOSITIONS[comp]
             return (py_a, oc_a, gloss_a)
 
+        # --- Узел имеет собственное чтение: Unihan kMandarin ---
+        gm = self.gloss_map.get(comp)
+        own_py = (gm or {}).get("pinyin") or ""
         ent = self.engine.characters_db.get(comp)
+        rec = None
         if ent and ent.baxter_sagart:
-            p = ent.baxter_sagart.get("primary") or ent.baxter_sagart.get("transitive_xiesheng")
-            if p:
-                py = p.get("pinyin") or "?"
-                oc = p.get("old_chinese") or f"*{py}"
-                gloss = p.get("gloss") or "корневая морфема"
-                return (py, oc, f"корневой смысл «{gloss}»")
+            rec = ent.baxter_sagart.get("primary") or ent.baxter_sagart.get("transitive_xiesheng")
+
+        if own_py and rec:
+            # СВОЁ чтение + архетип из Бакстера-Сагарта
+            oc = rec.get("old_chinese") or f"*{own_py}"
+            gloss = rec.get("gloss") or (gm or {}).get("definition") or "корневая морфема"
+            return (own_py, oc, f"корневой смысл «{gloss}»")
+
+        if own_py:
+            defn = (gm or {}).get("definition") or "словарная морфема"
+            return (own_py, f"*{own_py}", f"значение «{defn}»")
+
+        if rec:
+            py = rec.get("pinyin") or "?"
+            oc = rec.get("old_chinese") or f"*{py}"
+            gloss = rec.get("gloss") or "корневая морфема"
+            return (py, oc, f"корневой смысл «{gloss}»")
 
         if comp in self.transitive_baxter:
             tb = self.transitive_baxter[comp]
             return (tb.get("pinyin", "?"), tb.get("old_chinese", "*?"), tb.get("gloss", "производный узел Сэшэн"))
-
-        if comp in self.gloss_map:
-            gm = self.gloss_map[comp]
-            py = gm.get("pinyin") or "?"
-            defn = gm.get("definition") or "словарная морфема"
-            return (py, f"*{py}", f"значение «{defn}»")
 
         for pg, py, _ in PHONETICS_COMPREHENSIVE_DB:
             if pg == comp:
@@ -902,10 +924,49 @@ class CangjieMeaningDeducer:
                     f"выполнена чистая Zero-Shot реконструкция по прецедентам его узлов в графе CHISE/Unihan."
                 )
 
-            pred_reading = (
-                f"Выведенное по гнезду Сэшэн чтение: [{phon_py}] (древнекитайский архетип Бакстера–Сагарта: {phon_oc}, "
-                f"по аналогии с прецедентами узла «{phon_comp}»). При составном идеографическом чтении — [{sem_rad_meta['pinyin']} + {phon_py}]."
-            )
+            # [PHONO-REPAIR v1.0] РАЗДЕЛЕНИЕ ДВУХ ТИПОВ ЗВУЧАНИЯ.
+            #
+            #   ЗАСВИДЕЛЬСТВОВАННЫЙ знак («沃») — палеографу нужно СВОЁ чтение
+            #   знака (wò) и его архетип. Чтение фонетика (夭 → piě) здесь
+            #   лишь объяснение происхождения, а не ответ на вопрос «как он звучал».
+            #
+            #   НЕСУЩЕСТВУЮЩИЙ знак (⿰氵夭 и т.п.) — собственного чтения нет,
+            #   и единственный корректный ответ — вывод по гнезду Сэшэн.
+            if exists_in_dict and matched_char:
+                own_py = self.gloss_map.get(matched_char, {}).get("pinyin", "")
+                if not own_py:
+                    own_py = (self.transitive_baxter.get(matched_char, {}) or {}).get("pinyin", "")
+                if not own_py:
+                    ent_mc = self.engine.characters_db.get(matched_char)
+                    if ent_mc and ent_mc.baxter_sagart:
+                        rec_mc = ent_mc.baxter_sagart.get("primary") or ent_mc.baxter_sagart.get("transitive_xiesheng") or {}
+                        own_py = rec_mc.get("pinyin", "")
+                if own_py:
+                    own_oc = ""
+                    ent_mc = self.engine.characters_db.get(matched_char)
+                    if ent_mc and ent_mc.baxter_sagart:
+                        rec_mc = ent_mc.baxter_sagart.get("primary") or ent_mc.baxter_sagart.get("transitive_xiesheng") or {}
+                        own_oc = rec_mc.get("old_chinese", "")
+                    oc_txt = f", древнекитайский архетип {own_oc}" if own_oc else ""
+                    series_note = (
+                        f" Происхождение чтения: фонетик «{phon_comp}» (чтение серии [{phon_py}]) — "
+                        f"звучание знака отличается от чтения фонетика, как 河 hé ≠ 可 kě."
+                        if phon_comp and phon_py and phon_py != own_py else ""
+                    )
+                    pred_reading = (
+                        f"Собственное чтение знака: [{own_py}]{oc_txt}.{series_note}"
+                    )
+                else:
+                    pred_reading = (
+                        f"Выведенное по гнезду Сэшэн чтение: [{phon_py}] "
+                        f"(древнекитайский архетип Бакстера–Сагарта: {phon_oc}, "
+                        f"по аналогии с прецедентами узла «{phon_comp}»)."
+                    )
+            else:
+                pred_reading = (
+                    f"Выведенное по гнезду Сэшэн чтение: [{phon_py}] (древнекитайский архетип Бакстера–Сагарта: {phon_oc}, "
+                    f"по аналогии с прецедентами узла «{phon_comp}»). При составном идеографическом чтении — [{sem_rad_meta['pinyin']} + {phon_py}]."
+                )
 
             extra_comps_desc = ""
             if len(comps) > 2:

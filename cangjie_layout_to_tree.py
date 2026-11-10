@@ -354,7 +354,27 @@ class PointerTreeTransformerDecoder:
                 self.train_on_laptop_chise_trees(num_samples=3600, epochs=35)
 
     def estimate_model_footprint_mb(self) -> float:
-        return 18.42
+        """Реальный размер обучаемых весов модели в МБ.
+
+        Суммирует nbytes всех numpy-массивов в графе объектов декодера
+        (dec_layers, pointer/QKV-проекции, EGAT-слои, фичерайзер) вместо
+        захардкоженной константы.
+        """
+        def _sum_bytes(obj, acc):
+            if isinstance(obj, np.ndarray):
+                acc[0] += int(obj.nbytes)
+            elif isinstance(obj, dict):
+                for v in obj.values():
+                    _sum_bytes(v, acc)
+            elif isinstance(obj, (list, tuple, set)):
+                for v in obj:
+                    _sum_bytes(v, acc)
+            elif hasattr(obj, "__dict__"):
+                _sum_bytes(vars(obj), acc)
+            return acc
+
+        total_bytes = _sum_bytes(self, [0])[0]
+        return round(total_bytes / (1024.0 * 1024.0), 4)
 
     def save_pretrained_weights(self, path: Optional[str] = None) -> str:
         target = path or self.checkpoint_path

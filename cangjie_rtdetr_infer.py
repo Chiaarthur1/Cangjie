@@ -124,24 +124,24 @@ class CangjieVisionPredictor:
                     "bbox": xywhn
                 })
         else:
-            # Детерминированный fallback по имени файла (поддерживает и '⿰氵寺.png', и 'C_001_⿰里龠.png')
-            basename = os.path.splitext(os.path.basename(image_path))[0]
-            tail = basename.split("_")[-1]
-            if len(tail) >= 3 and tail[0] in set(IDC_OPERATORS):
-                op_char, r1, r2 = tail[0], tail[1], tail[2]
-                op_id = 214 + IDC_OPERATORS.index(op_char)
-                b1 = [0.28, 0.50, 0.35, 0.80] if op_char == "⿰" else [0.50, 0.28, 0.80, 0.35]
-                b2 = [0.72, 0.50, 0.45, 0.80] if op_char == "⿰" else [0.50, 0.72, 0.80, 0.45]
-                detections = [
-                    {"class_id": op_id, "glyph": op_char, "name": f"operator_{op_char}", "confidence": 0.99, "bbox": [0.5, 0.5, 0.9, 0.9]},
-                    {"class_id": 84, "glyph": r1, "name": "component_1", "confidence": 0.98, "bbox": b1},
-                    {"class_id": 100, "glyph": r2, "name": "component_2", "confidence": 0.95, "bbox": b2}
-                ]
+            # [v9.7] Честный fallback: без обученной модели детектор НЕ выдумывает
+            # детекции из имени файла. Возвращаем явный статус — пайплайн должен
+            # переключиться на пиксельный Chamfer+HOG сегментатор Канси.
+            return {
+                "image_path": image_path,
+                "detector_status": "unavailable",
+                "reason": "no_trained_detector_weights",
+                "raw_detections": [],
+                "reconstructed_ids": "UNKNOWN",
+                "semantic_radical": "UNKNOWN",
+                "phonetic_component": "UNKNOWN"
+            }
 
         reconstructed_ids, ordered_rads = TopologicalDeconstructor.reconstruct_ids(detections)
 
         return {
             "image_path": image_path,
+            "detector_status": "ok",
             "raw_detections": detections,
             "reconstructed_ids": reconstructed_ids,
             "semantic_radical": ordered_rads[0]["glyph"] if ordered_rads else "UNKNOWN",

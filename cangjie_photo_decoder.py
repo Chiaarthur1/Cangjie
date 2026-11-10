@@ -47,13 +47,20 @@ from cangjie_layout_to_tree import (
     GLYPH_TO_CLASS_ID
 )
 from cangjie_edge_cpu_runtime import SauvolaSIMDPreprocessor, InMemorySQLiteGraphRAG
+from cangjie_paleo_matcher import normalize_component_mask
 from cangjie_product_logic import ProductRealLogic
+from cangjie_config import CangjieConfig, load_config
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] [PHOTO-DECODER-v8]: %(message)s"
 )
 logger = logging.getLogger("CangjiePhotoDecoder")
+
+# [v9.3] Эра по умолчанию, если определить не удалось. Держим строкой,
+# чтобы не тянуть импорт cangjie_paleo_matcher на уровне модуля
+# (он тянет numpy-банки и ломает быстрый smoke-import).
+ERA_KAISHU_FALLBACK = "KAISHU"
 
 
 @dataclass
@@ -269,6 +276,11 @@ class MultiScaleComponentScanner:
         self.model = None
         self.repo = repo if repo is not None else GlyphRepository()
         self._templates: Dict[str, Tuple[str, np.ndarray, np.ndarray]] = {}
+        # [v9.0] Калиброванный эра-специфичный матчер (ленивая инициализация)
+        self._v9_matcher = None
+        # [v9.3] Эра снимка: определяется по стилю ДО идентификации знака.
+        self._era_hint: Dict[str, Any] = {}
+        self._era_locked = False
 
         if os.path.exists(weights_path):
             try:
@@ -390,6 +402,93 @@ class MultiScaleComponentScanner:
             pass
 
     def match_single_crop(self, tight_crop_ink: np.ndarray) -> Tuple[str, str, float]:
+        """
+        Сопоставляет кроп компонента с банком шаблонов.
+
+        [v9.0] Основной путь — эра-специфичный калиброванный матчер
+        `cangjie_paleo_matcher`: 4 720 компонентов CHISE на эру, честная
+        вероятность (posterior × fit), статусы RECOGNIZED / AMBIGUOUS /
+        UNRECOGNIZED. Старый путь на 281 радикале Канси оставлен как
+        fallback на случай, если банк v9 не собран.
+
+        СТАРЫЙ ПУТЬ БЫЛ ФИКТИВНЫМ:
+            conf = max(0.55, min(0.99, best_score * 1.12))
+        — нижняя граница 0.55 гарантировала «55%» для ЛЮБОГО входа, включая
+        белый шум. Палеограф принимал это за оценку.
+        """
+        if self._v9_matcher is None:
+            self._v9_matcher = self._build_v9_matcher()
+        if self._v9_matcher is not None:
+            try:
+                # [v9.0] ВАЖНО: кроп из фото имеет произвольный размер, а
+                # дескриптор матчера (HOG-сетка 21/43/64) рассчитан ровно на
+                # 64x64. Без нормализации сетка смещается и уверенность
+                # падает в ноль. normalize_component_mask делает ТЕСНЫЙ КРОП
+                # по туши + ресайз до 64x64 — так же, как строятся шаблоны.
+                ink_64 = normalize_component_mask(tight_crop_ink)
+                res = self._v9_matcher.match(ink_64, top_k=5)
+                if res.best is not None:
+                    return res.best.glyph, res.best.name, round(float(res.confidence), 4)
+            except Exception as e:
+                logger.warning("Матчер v9 не отработал (%s) — переключаюсь на fallback v8", e)
+                self._v9_matcher = None
+
+        return self._match_single_crop_legacy(tight_crop_ink)
+
+    def _build_v9_matcher(self, era: Optional[str] = None):
+        """
+        Строит/берёт из кэша банк шаблонов v9 для эпохи.
+
+        [v9.3] ТЕПЕРЬ ЭРА ОПРЕДЕЛЯЕТСЯ ПО САМОМУ СНИМКУ, а не жёстко KAISHU.
+        Раньше сканер ВСЕГДА подключал банк кайшу, даже если на фото был
+        甲骨文 или 金文. Для палеографа это катастрофа: силуэт оракульной
+        кости и кайшу-глиф — это разные Вселенные, и кросс-матчинг давал
+        мусор. Теперь банк выбирается по стилю снимка (см. detect_era).
+        """
+        try:
+            from cangjie_paleo_matcher import get_bank, ERA_KAISHU
+            target_era = era or ERA_KAISHU
+            bank = get_bank(target_era, data_dir=self.data_dir, repo=self.repo)
+            if bank.is_ready:
+                logger.info("Подключён калиброванный матчер v9: %d шаблонов (эра %s)",
+                            len(bank.glyphs), bank.era_mode)
+                return bank
+            logger.warning("Банк v9 для эры %s не готов — fallback v8", target_era)
+        except Exception as e:
+            logger.warning("Матчер v9 недоступен (%s) — fallback v8", e)
+        return None
+
+    def detect_era(self, ink_matrix: np.ndarray) -> str:
+        """
+        [v9.3] Определяет эру/письменность по всему снимку.
+
+        Для ancient-пайплайна это критично: сначала определяем «в каком мире
+        мы находимся» (甲骨文 / 金文 / 篆 / кайшу), и только потом ищем
+        знак в банке ИМЕННО ЭТОЙ эры. Иначе мы ищем 甲骨ный знак среди
+        кайшу-шаблонов и получаем уверенную неправду.
+        """
+        if self._era_locked:
+            return self._v9_matcher.era_mode if self._v9_matcher is not None else ERA_KAISHU_FALLBACK
+
+        try:
+            from cangjie_paleo_matcher import match_across_eras, ERA_KAISHU
+            whole_ink = normalize_component_mask(ink_matrix)
+            det = match_across_eras(
+                whole_ink, data_dir=self.data_dir, repo=self.repo
+            )
+            best = det.get("best_era")
+            if best:
+                logger.info("Эра снимка определена: %s (scores: %s)",
+                            best, {k: round(v, 4) for k, v in det.get("era_scores", {}).items()})
+                self._era_hint = det
+                return best
+        except Exception as e:
+            logger.debug("Определение эры по снимку недоступно: %s", e)
+
+        return ERA_KAISHU_FALLBACK
+
+    def _match_single_crop_legacy(self, tight_crop_ink: np.ndarray) -> Tuple[str, str, float]:
+        """Fallback-путь v8: 281 радикал Канси, фиктивная уверенность."""
         self._ensure_templates()
         pil_crop = Image.fromarray(((1.0 - np.clip(tight_crop_ink, 0.0, 1.0)) * 255.0).astype(np.uint8))
         resized = np.array(pil_crop.resize((64, 64), Image.Resampling.BILINEAR), dtype=np.float32)
@@ -413,6 +512,14 @@ class MultiScaleComponentScanner:
         ink_matrix: np.ndarray,
         estimated_strokes: int
     ) -> List[DetectedComponentBox]:
+        # [v9.3] СНАЧАЛА определяем эру по всему снимку, ПОТОМ сканируем
+        # компоненты. Раньше банк был всегда KAISHU — для фото 甲骨文/金文
+        # это означало кросс-матчинг между несовместимыми мирами.
+        if self._v9_matcher is None:
+            era = self.detect_era(ink_matrix)
+            self._v9_matcher = self._build_v9_matcher(era)
+            self._era_locked = True
+
         if self.model is not None:
             dets = self._scan_with_rtdetr_sahi(clean_rgb, enable_deep_tiles=(estimated_strokes >= 25))
             if dets:
@@ -481,13 +588,39 @@ class MultiScaleComponentScanner:
         if len(xs) == 0:
             return []
 
-        max_depth = 1 if estimated_strokes < 12 else (2 if estimated_strokes < 36 else 3)
+        # [v9.2] АДАПТИВНАЯ ГЛУБИНА СПУСКА.
+        #   БЫЛО: max_depth = 1 (<12 черт) / 2 (<36) / 3 (>=36).
+        #   Для 172-чертного знака это катастрофа: 3 уровня дают максимум
+        #   8 листьев, а нужно разложить знак на десятки компонентов.
+        #   Твой кейс («понимать нестандартные иероглифы в 172 черты»)
+        #   требует спуска на 5-6 уровней вглубь.
+        #
+        #   Теперь глубина растёт логарифмически от числа черт:
+        #     12 черт  -> 2   (простое ⿰⿱)
+        #     36 черт  -> 3
+        #     64 черт  -> 4
+        #   172 черт  -> 5
+        #   256+      -> 6 (потолок)
+        #   Минимальный размер листа тоже уменьшается с глубиной, иначе
+        #   глубокие уровни не будут найдены (см. rh < 44 -> scale).
+        max_depth = 2
+        if estimated_strokes >= 36:
+            max_depth = 3
+        if estimated_strokes >= 64:
+            max_depth = 4
+        if estimated_strokes >= 110:
+            max_depth = 5
+        if estimated_strokes >= 200:
+            max_depth = 6
+        # Порог минимального размера листа: глубже -> мельче листья.
+        leaf_min = 44 if max_depth <= 2 else (36 if max_depth == 3 else (30 if max_depth == 4 else (24 if max_depth == 5 else 20)))
+        leaf_min_ink = 95 if max_depth <= 2 else max(28, int(95 * (36.0 / max(leaf_min, 1)) ** 1.5))
         leaf_regions: List[Tuple[int, int, int, int]] = []
 
         def _split_region(x1: int, y1: int, x2: int, y2: int, depth: int) -> None:
             sub = ink[y1:y2, x1:x2]
             rh, rw = sub.shape
-            if depth >= max_depth or rh < 44 or rw < 44 or np.sum(sub > 0.2) < 95:
+            if depth >= max_depth or rh < leaf_min or rw < leaf_min or np.sum(sub > 0.2) < leaf_min_ink:
                 leaf_regions.append((x1, y1, x2, y2))
                 return
 
@@ -671,8 +804,12 @@ class CangjiePaleoPhotoDecoder:
         deducer: Optional[CangjieMeaningDeducer] = None,
         repo: Optional[GlyphRepository] = None,
         layout_to_tree: Optional[PointerTreeTransformerDecoder] = None,
-        sqlite_graphrag: Optional[InMemorySQLiteGraphRAG] = None
+        sqlite_graphrag: Optional[InMemorySQLiteGraphRAG] = None,
+        config: Optional[CangjieConfig] = None
     ):
+        self.config = config if config is not None else load_config()
+        self.weights_path = weights_path
+        self.data_dir = data_dir
         self.scanner = MultiScaleComponentScanner(weights_path=weights_path, repo=repo, data_dir=data_dir)
         self.layout_to_tree = layout_to_tree if layout_to_tree is not None else PointerTreeTransformerDecoder(
             d_model=256, n_egat_layers=4, n_decoder_layers=3, weights_dir=data_dir
@@ -680,14 +817,61 @@ class CangjiePaleoPhotoDecoder:
         self.sqlite_graphrag = sqlite_graphrag if sqlite_graphrag is not None else InMemorySQLiteGraphRAG()
         self.deducer = deducer if deducer is not None else CangjieMeaningDeducer(data_dir=data_dir)
 
+    def _scan_region(
+        self,
+        sub_ink: np.ndarray,
+        clean_img: Image.Image,
+        crop: Tuple[int, int, int, int],
+        est_c: int,
+        char_index: int,
+        W: int,
+        H: int,
+        detector_backend: str
+    ) -> List[DetectedComponentBox]:
+        """Сканирует один сегмент знака с учётом выбранного бэкенда детектора.
+
+        Нейросетевой путь используется только при наличии обученных весов;
+        если он ничего не нашёл или недоступен — честный пиксельный fallback.
+        """
+        cx1, cy1, cx2, cy2 = crop
+        use_neural = detector_backend in ("rtdetr", "yolo", "auto") and self.scanner.model is not None
+        if use_neural:
+            sub_rgb = clean_img.crop((cx1, cy1, cx2, cy2))
+            boxes = self.scanner._scan_with_rtdetr_sahi(sub_rgb, enable_deep_tiles=(est_c >= 25))
+            # координаты нейросети нормализованы к кропу — переводим в глобальные
+            cw, ch = max(1, cx2 - cx1), max(1, cy2 - cy1)
+            for b in boxes:
+                b.x1 = (cx1 + b.x1 * cw) / float(W)
+                b.y1 = (cy1 + b.y1 * ch) / float(H)
+                b.x2 = (cx1 + b.x2 * cw) / float(W)
+                b.y2 = (cy1 + b.y2 * ch) / float(H)
+                b.char_index = char_index
+            if boxes:
+                return boxes
+        return self.scanner._scan_with_recursive_pixel_partition(
+            sub_ink, estimated_strokes=est_c, char_index=char_index, global_offset=(cx1, cy1, W, H)
+        )
+
     def decode_photo(
         self,
         image_path: str,
         output_dir: str = "./cangjie_decoded_reports",
         llm_url: Optional[str] = None,
         strokes: Optional[List[List[Tuple[float, float]]]] = None,
-        stamped_nodes: Optional[List[Dict[str, Any]]] = None
+        stamped_nodes: Optional[List[Dict[str, Any]]] = None,
+        detector_backend: Optional[str] = None,
+        matcher_backend: Optional[str] = None,
+        llm_backend: Optional[str] = None,
+        llm_model: Optional[str] = None
     ) -> Dict[str, Any]:
+        # Выбор модели: явный аргумент > конфиг > честный авто-fallback.
+        det_backend = detector_backend or self.config.detector.backend
+        mat_backend = matcher_backend or self.config.matcher.backend
+        llm_b = llm_backend or self.config.llm.backend
+        llm_m = llm_model or self.config.llm.model
+        llm_u = (llm_url or self.config.llm.url) if llm_b != "none" else None
+        resolved_det = det_backend if det_backend != "auto" else ("rtdetr" if self.scanner.model is not None else "pixel")
+        resolved_mat = self.config.resolve_matcher_backend() if mat_backend == "auto" else mat_backend
         os.makedirs(output_dir, exist_ok=True)
         t_cycle_start = time.perf_counter()
 
@@ -717,15 +901,41 @@ class CangjiePaleoPhotoDecoder:
             char_segments = PaleoPhotoPreprocessor.segment_multiple_characters(ink_mat, max_chars=8)
             for c_idx, (cx1, cy1, cx2, cy2) in enumerate(char_segments):
                 sub_ink = ink_mat[cy1:cy2, cx1:cx2]
-                c_boxes = self.scanner._scan_with_recursive_pixel_partition(
-                    sub_ink,
-                    estimated_strokes=max(12, est_strokes // max(1, len(char_segments))),
-                    char_index=c_idx,
-                    global_offset=(cx1, cy1, W, H)
+                c_boxes = self._scan_region(
+                    sub_ink, clean_img, (cx1, cy1, cx2, cy2),
+                    est_c=max(12, est_strokes // max(1, len(char_segments))),
+                    char_index=c_idx, W=W, H=H, detector_backend=resolved_det
                 )
                 all_boxes.extend(c_boxes)
 
         scan_ms = (time.perf_counter() - t_scan_0) * 1000.0
+
+        # [v9.6] ШАГ 0: ПРЯМОЕ ОПОЗНАНИЕ ЦЕЛОГО ЗНАКА.
+        #   Порядок принципиален: палеографу нужен ответ «что это за знак».
+        #   Разбор на компоненты (⿰⿱⿲...) — это объяснение СОСТАВА, а не
+        #   ответ на главный вопрос. Кроме того, при повреждённом знаке
+        #   разбор может не собраться, а целый знак матчится по форме.
+        #   Поэтому сначала пробуем узнать ЦЕЛОЕ, и только затем разбираем.
+        t_whole_0 = time.perf_counter()
+        whole_glyph_results: List[Dict[str, Any]] = []
+        try:
+            from cangjie_whole_glyph import WholeGlyphMatcher
+            from cangjie_paleo_matcher import normalize_component_mask
+            _wm = WholeGlyphMatcher(era="KAISHU", data_dir="./data")
+            if _wm.is_available():
+                for c_idx, (cx1, cy1, cx2, cy2) in enumerate(char_segments):
+                    sub = ink_mat[cy1:cy2, cx1:cx2]
+                    _ys, _xs = np.where(sub > 0.2)
+                    if len(_xs) == 0:
+                        whole_glyph_results.append({"status": "EMPTY"})
+                        continue
+                    _crop = sub[_ys.min():_ys.max() + 1, _xs.min():_xs.max() + 1]
+                    _r = _wm.match_whole_glyph(normalize_component_mask(_crop))
+                    _r["char_index"] = c_idx + 1
+                    whole_glyph_results.append(_r)
+        except Exception as _e:
+            logger.warning("Прямое опознание целого знака недоступно: %s", _e)
+        whole_glyph_ms = (time.perf_counter() - t_whole_0) * 1000.0
 
         # Собираем дерево IDS для каждого найденного иероглифа на снимке
         t_ast_0 = time.perf_counter()
@@ -746,14 +956,33 @@ class CangjiePaleoPhotoDecoder:
             t_res = self.layout_to_tree.decode_layout_to_tree(rad_nodes)
             c_ids = t_res["ids_string"]
             reconstructed_ids_list.append(c_ids)
-            c_ded = self.deducer.deduce(c_ids, llm_url=llm_url)
+            c_ded = self.deducer.deduce(c_ids, llm_url=llm_u)
             cx1, cy1, cx2, cy2 = char_segments[c_idx]
+
+            # [v9.6] Прямое опознание целого знака (если банк собран).
+            _wg = next((r for r in whole_glyph_results
+                        if r.get("char_index") == c_idx + 1), None)
+            _wg_best = _wg.get("best") if _wg else None
+            _wg_conf = float(_wg.get("confidence", 0.0)) if _wg else 0.0
+            _wg_status = _wg.get("status") if _wg else "UNAVAILABLE"
+
+            # Приоритет: если целый знак опознан уверенно — он и есть ответ.
+            # Иначе — канонический знак по разбору (может быть и None).
+            _final_char = c_ded["matched_canonical_char"]
+            _answer_source = "IDS_DECOMPOSITION"
+            if _wg_status == "RECOGNIZED" and _wg_best and _wg_conf >= 0.30:
+                _final_char = _wg_best
+                _answer_source = "WHOLE_GLYPH_MATCH"
+
             multi_char_dossiers.append({
                 "char_index": c_idx + 1,
                 "char_bbox_norm": [round(cx1 / float(W), 4), round(cy1 / float(H), 4), round(cx2 / float(W), 4), round(cy2 / float(H), 4)],
                 "reconstructed_ids": c_ids,
                 "coalesced_ids": c_ded["deconstructed_ids"],
                 "matched_canonical_char": c_ded["matched_canonical_char"],
+                "whole_glyph_match": _wg,
+                "final_answer_char": _final_char,
+                "final_answer_source": _answer_source,
                 "valency_trace": t_res["valency_trace"],
                 "detected_boxes": [
                     {
@@ -769,7 +998,7 @@ class CangjiePaleoPhotoDecoder:
 
         if not multi_char_dossiers:
             fallback_ids = "⿰手戈"
-            c_ded = self.deducer.deduce(fallback_ids, llm_url=llm_url)
+            c_ded = self.deducer.deduce(fallback_ids, llm_url=llm_u)
             multi_char_dossiers.append({
                 "char_index": 1,
                 "char_bbox_norm": [0.08, 0.08, 0.92, 0.92],
@@ -799,6 +1028,31 @@ class CangjiePaleoPhotoDecoder:
 
         total_cycle_ms = (time.perf_counter() - t_cycle_start) * 1000.0
 
+        # [v9.0] ОПРЕДЕЛЕНИЕ ЭПОХИ ПО САМОМУ СНИМКУ.
+        # Для палеографа это самостоятельный сигнал: по стилистике резьбы
+        # (шестигранное солнце с точкой на кости vs. прямоугольник в кайшу)
+        # можно сузить эпоху и письменность ДО идентификации знака.
+        era_detection: Dict[str, Any] = {}
+        try:
+            from cangjie_paleo_matcher import match_across_eras
+            whole_ink = normalize_component_mask(ink_mat)
+            era_detection = match_across_eras(
+                whole_ink, data_dir=self.scanner.data_dir, repo=self.scanner.repo
+            )
+        except Exception as e:
+            logger.debug("Определение эры по снимку недоступно: %s", e)
+
+        # [v9.0] Честный статус распознавания по компонентам
+        recog_status = "UNKNOWN"
+        if all_boxes:
+            mean_conf = float(np.mean([b.confidence for b in all_boxes]))
+            if mean_conf >= 0.62:
+                recog_status = "RECOGNIZED"
+            elif mean_conf >= 0.28:
+                recog_status = "AMBIGUOUS"
+            else:
+                recog_status = "UNRECOGNIZED"
+
         report = {
             "source_photo": os.path.abspath(image_path),
             "annotated_visual_blueprint": visual_map_path,
@@ -809,13 +1063,25 @@ class CangjiePaleoPhotoDecoder:
             "reconstructed_deep_ids": full_ids,
             "all_reconstructed_ids": reconstructed_ids_list,
             "multi_character_dossiers": multi_char_dossiers,
+            "whole_glyph_recognition": whole_glyph_results,
             "layout_to_tree_valency_trace": primary_dossier["valency_trace"],
             "is_grammatically_closed_ast": True,
             "reichenbach_prl_truth_score": round(prl_truth, 4),
             "spatial_registers_breakdown": layers_summary,
+            "recognition_status": recog_status,
+            "model_selection": {
+                "detector_backend": resolved_det,
+                "detector_neural_available": self.scanner.model is not None,
+                "matcher_backend": resolved_mat,
+                "llm_backend": llm_b,
+                "llm_model": llm_m or None,
+                "llm_url": llm_u or None
+            },
+            "era_detection_from_photo": era_detection,
             "edge_runtime_latencies_ms": {
                 "sauvola_preprocessing_ms": prep["sauvola_preprocessing_ms"],
                 "vision_detection_ms": round(scan_ms, 2),
+                "whole_glyph_match_ms": round(whole_glyph_ms, 2),
                 "layout_to_tree_egat_ast_ms": round(ast_ms, 2),
                 "in_memory_sqlite_graphrag_ms": sqlite_evidence["query_time_ms"],
                 "total_pipeline_ms": round(total_cycle_ms, 2)
@@ -921,16 +1187,43 @@ def print_photo_decoding_dossier(rep: Dict[str, Any]) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Project Cangjie — Профессиональный мульти-иероглифный фото-декодер палеографа [v8.0]")
+    parser = argparse.ArgumentParser(description="Project Cangjie — Профессиональный мульти-иероглифный фото-декодер палеографа [v9.7]")
     parser.add_argument("--photo", type=str, required=True, help="Путь к фотографии иероглифа / свитка / талисмана / эстампажа")
-    parser.add_argument("--weights", type=str, default="rtdetr-x.pt", help="Путь к обученным весам D-FINE / RT-DETR")
+    parser.add_argument("--weights", type=str, default=None, help="Путь к обученным весам детектора (rtdetr-x.pt / свой чекпойнт)")
+    parser.add_argument("--config", type=str, default=None, help="Путь к cangjie_config.json")
+    parser.add_argument("--detector", type=str, default=None, choices=["auto", "rtdetr", "yolo", "pixel", "none"], help="Бэкенд детектора")
+    parser.add_argument("--matcher", type=str, default=None, choices=["chamfer_hog", "embedding"], help="Бэкенд матчера")
+    parser.add_argument("--llm", type=str, default=None, choices=["none", "ollama", "vllm"], help="Бэкенд LLM для дедукции")
+    parser.add_argument("--llm-model", type=str, default=None, help="Имя модели LLM (напр. qwen2.5:7b)")
     parser.add_argument("--llm-url", type=str, default=None, help="URL локальной Ollama или vLLM (опционально)")
     parser.add_argument("--output", type=str, default="./cangjie_decoded_reports", help="Папка сохранения карты и отчета")
     parser.add_argument("--json", action="store_true", help="Вывести JSON")
     args = parser.parse_args()
 
-    decoder = CangjiePaleoPhotoDecoder(weights_path=args.weights)
-    report = decoder.decode_photo(args.photo, output_dir=args.output, llm_url=args.llm_url)
+    config = load_config(args.config) if args.config else None
+    if config is not None:
+        if args.detector:
+            config.detector.backend = args.detector
+        if args.matcher:
+            config.matcher.backend = args.matcher
+        if args.llm:
+            config.llm.backend = args.llm
+        if args.llm_model:
+            config.llm.model = args.llm_model
+        if args.llm_url:
+            config.llm.url = args.llm_url
+    weights = args.weights or (config.detector.weights if config else "rtdetr-x.pt")
+
+    decoder = CangjiePaleoPhotoDecoder(weights_path=weights, config=config)
+    report = decoder.decode_photo(
+        args.photo,
+        output_dir=args.output,
+        llm_url=args.llm_url,
+        detector_backend=args.detector,
+        matcher_backend=args.matcher,
+        llm_backend=args.llm,
+        llm_model=args.llm_model
+    )
 
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
