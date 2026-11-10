@@ -1952,6 +1952,7 @@ def build_production_studio_html(
         </div>
         <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
           <button class="btn-gold" onclick="runTreeEval()">📊 Честный eval разбора IDS</button>
+          <button class="btn-outline" onclick="runAB()">🅰️🅱️ A/B двух детекторов</button>
           <button class="btn-outline" onclick="startRebuild('KAISHU')">♻️ Пересобрать банк KAISHU</button>
           <button class="btn-outline" onclick="loadConfigInfo()">⚙️ Показать конфиг</button>
         </div>
@@ -2143,6 +2144,20 @@ def build_production_studio_html(
       try {{
         const r = await fetch('/api/config'); const d = await r.json();
         el.innerHTML = '<pre style="white-space:pre-wrap; font-size:11px;">' + JSON.stringify(d.config, null, 2) + '</pre>';
+      }} catch (e) {{ el.innerHTML = 'Ошибка: ' + e; }}
+    }}
+
+    async function runAB() {{
+      if (!LABEL_IMAGE) {{ alert('Сначала загрузите фото во вкладке «Данные» (разметка).'); return; }}
+      const el = document.getElementById('opsResult');
+      el.innerHTML = 'Сравниваю детекторы… (может занять ~10 с)';
+      try {{
+        const r = await fetch('/api/ab', {{
+          method: 'POST', headers: {{ 'Content-Type': 'application/json' }},
+          body: JSON.stringify({{ image_base64: LABEL_IMAGE, weights_a: 'rtdetr-x.pt', weights_b: 'best.pt' }})
+        }});
+        const d = await r.json();
+        el.innerHTML = '<pre style="white-space:pre-wrap; font-size:11px;">' + JSON.stringify(d, null, 2) + '</pre>';
       }} catch (e) {{ el.innerHTML = 'Ошибка: ' + e; }}
     }}
 
@@ -3031,7 +3046,56 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
-        if self.path.startswith("/api/label/export"):
+        if self.path.startswith("/api/ab"):
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            img_bytes = base64.b64decode(payload["image_base64"])
+            wa = payload.get("weights_a", "rtdetr-x.pt")
+            wb = payload.get("weights_b", "best.pt")
+            import tempfile
+            from cangjie_photo_decoder import CangjiePaleoPhotoDecoder
+            from cangjie_model_registry import CangjieModelRegistry
+            _reg = CangjieModelRegistry(config=self.workstation.photo_decoder.config)
+            _paths = {m.id: m.path for m in _reg.scan() if m.kind == "detector"}
+
+            def _resolve(w: str) -> str:
+                if os.path.exists(w):
+                    return w
+                # резолвим голое имя (best.pt) в полный путь из реестра
+                return _paths.get(os.path.basename(w), w)
+
+            wa = _resolve(wa)
+            wb = _resolve(wb)
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                tmp.write(img_bytes)
+                tmp_path = tmp.name
+            def _run(w: str) -> dict:
+                try:
+                    d = CangjiePaleoPhotoDecoder(weights_path=w, data_dir="./data")
+                    r = d.decode_photo(tmp_path, output_dir=tempfile.gettempdir())
+                    return {
+                        "weights": w,
+                        "reconstructed_ids": r.get("reconstructed_deep_ids"),
+                        "recognition_status": r.get("recognition_status"),
+                        "components": r.get("total_detected_components"),
+                        "detector_backend": r["model_selection"]["detector_backend"],
+                    }
+                except Exception as e:
+                    return {"weights": w, "error": str(e)}
+            ra = _run(wa)
+            rb = _run(wb)
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+            res = {"a": ra, "b": rb, "same_ids": ra.get("reconstructed_ids") == rb.get("reconstructed_ids")}
+            body = json.dumps(res, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif self.path.startswith("/api/label/export"):
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             img_bytes = base64.b64decode(payload["image_base64"])
