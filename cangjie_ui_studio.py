@@ -1929,6 +1929,19 @@ def build_production_studio_html(
         <button class="btn-gold" onclick="loadDatasets()" style="margin-bottom:12px;">🔄 Обновить статус</button>
         <div id="datasetsTable" class="sec-body" style="font-size:12.5px; color:var(--text-silver);">Нажмите «Обновить статус».</div>
       </div>
+
+      <div class="panel-card" style="margin-top:14px;">
+        <div class="panel-header">
+          <div class="panel-title"><span class="accent">■</span> Разметка боксов (полуавтомат)</div>
+          <span class="badge-tag">авто-детекция → YOLO</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <input type="file" id="labelPhotoInput" accept="image/*" style="display:none;" onchange="labelDetectPhoto(this)" />
+          <button class="btn-gold" onclick="document.getElementById('labelPhotoInput').click()">📷 Загрузить фото для разметки</button>
+          <button class="btn-outline" onclick="exportLabels()">💾 Экспорт в YOLO</button>
+        </div>
+        <div id="labelStatus" class="sec-body" style="font-size:12.5px; color:var(--text-silver); margin-top:8px;">Загрузите фото — детектор найдёт боксы компонентов, затем экспортируйте в YOLO (data/labeled/).</div>
+      </div>
     </section>
 
     <section id="view-settings" class="view-section">
@@ -2131,6 +2144,47 @@ def build_production_studio_html(
         const r = await fetch('/api/config'); const d = await r.json();
         el.innerHTML = '<pre style="white-space:pre-wrap; font-size:11px;">' + JSON.stringify(d.config, null, 2) + '</pre>';
       }} catch (e) {{ el.innerHTML = 'Ошибка: ' + e; }}
+    }}
+
+    let LABEL_BOXES = [];
+    let LABEL_IMAGE = null;
+    let LABEL_FILENAME = 'glyph.png';
+
+    async function labelDetectPhoto(inputEl) {{
+      if (!inputEl.files || !inputEl.files[0]) return;
+      const file = inputEl.files[0];
+      LABEL_FILENAME = file.name;
+      const reader = new FileReader();
+      reader.onload = async function(ev) {{
+        const dataUrl = ev.target.result;
+        const b64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+        LABEL_IMAGE = b64;
+        document.getElementById('labelStatus').innerHTML = 'Детектирую боксы…';
+        try {{
+          const r = await fetch('/api/decode_photo', {{
+            method: 'POST', headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ filename: file.name, image_base64: b64, detector: 'pixel', matcher: 'chamfer_hog', llm: 'none', llm_model: '', llm_url: '' }})
+          }});
+          const d = await r.json();
+          LABEL_BOXES = d.detected_boxes || [];
+          document.getElementById('labelStatus').innerHTML = 'Найдено боксов: <b>' + LABEL_BOXES.length + '</b>. Нажмите «Экспорт в YOLO».';
+        }} catch (e) {{
+          document.getElementById('labelStatus').innerHTML = 'Ошибка детекции: ' + e;
+        }}
+      }};
+      reader.readAsDataURL(file);
+    }}
+
+    async function exportLabels() {{
+      if (!LABEL_IMAGE) {{ alert('Сначала загрузите фото.'); return; }}
+      try {{
+        const r = await fetch('/api/label/export', {{
+          method: 'POST', headers: {{ 'Content-Type': 'application/json' }},
+          body: JSON.stringify({{ filename: LABEL_FILENAME, image_base64: LABEL_IMAGE, boxes: LABEL_BOXES }})
+        }});
+        const d = await r.json();
+        document.getElementById('labelStatus').innerHTML = 'Экспортировано: <b>' + d.boxes_exported + '</b> боксов → ' + d.labels + (d.unmapped_glyphs && d.unmapped_glyphs.length ? '<br>Без класса (fallback 0): ' + d.unmapped_glyphs.join(', ') : '');
+      }} catch (e) {{ document.getElementById('labelStatus').innerHTML = 'Ошибка экспорта: ' + e; }}
     }}
 
     function toggleDrawer(drawerId, openState) {{
@@ -2977,7 +3031,21 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
-        if self.path.startswith("/api/eval"):
+        if self.path.startswith("/api/label/export"):
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            img_bytes = base64.b64decode(payload["image_base64"])
+            fname = payload.get("filename", "glyph.png")
+            boxes = payload.get("boxes", [])
+            from cangjie_labeler import export_yolo
+            res = export_yolo(img_bytes, fname, boxes)
+            body = json.dumps(res, ensure_ascii=False).encode("utf-8")
+            self.send_response(200 if res.get("ok") else 400)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif self.path.startswith("/api/eval"):
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             kind = payload.get("kind", "tree")
