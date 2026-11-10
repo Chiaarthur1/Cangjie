@@ -1,0 +1,6 @@
+# Project Cangjie — обучение детектора/эмбеддингов на GPU
+# Установка (RTX 4060 = sm_89, нужен CUDA ≥ 12.1):
+#   pip install -r requirements-gpu.txt --index-url https://download.pytorch.org/whl/cu121
+torch>=2.1
+torchvision>=0.16
+ultralytics>=8.3

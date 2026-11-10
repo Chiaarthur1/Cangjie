@@ -31,7 +31,7 @@ import tempfile
 import subprocess
 import logging
 import argparse
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 from typing import Dict, List, Any, Optional, Tuple
 from PIL import Image, ImageDraw
 import numpy as np
@@ -144,8 +144,9 @@ def format_readable_ids(ids_str: str) -> str:
     return ids_str.replace("⻗", "雨")
 
 
-class ReusableHTTPServer(HTTPServer):
+class ReusableHTTPServer(ThreadingHTTPServer):
     allow_reuse_address = True
+    daemon_threads = True
 
 
 def free_port_if_in_use(port: int) -> None:
@@ -171,6 +172,22 @@ def free_port_if_in_use(port: int) -> None:
 # ==============================================================================
 # 1. РЕАЛЬНЫЙ СЕРВЕРНЫЙ ГЕНЕРАТОР ТОПОЛОГИИ, МУЛЬТИ-СВИТКОВ И ПРЕЦЕДЕНТНОЙ ДЕДУКЦИИ
 # ==============================================================================
+
+MAX_IMAGE_BYTES = 20 * 1024 * 1024  # 20 МБ
+
+
+def _validate_image_bytes(raw: bytes) -> None:
+    """Проверяет, что входные байты — валидное изображение разумного размера."""
+    if not raw:
+        raise ValueError("Пустое изображение")
+    if len(raw) > MAX_IMAGE_BYTES:
+        raise ValueError(f"Изображение слишком большое: {len(raw) // (1024 * 1024)} МБ (макс 20 МБ)")
+    try:
+        with Image.open(io.BytesIO(raw)) as im:
+            im.verify()
+    except Exception as e:
+        raise ValueError(f"Некорректное изображение: {e}")
+
 
 class ProductionPaleoWorkstationEngine:
     def __init__(self, data_dir: str = "./data", resolution: int = 512, hw_profile: str = "laptop"):
@@ -564,6 +581,7 @@ class ProductionPaleoWorkstationEngine:
         llm_model: Optional[str] = None,
         llm_url: Optional[str] = None
     ) -> Dict[str, Any]:
+        _validate_image_bytes(raw_bytes)
         suffix = os.path.splitext(filename)[1] or ".png"
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(raw_bytes)
@@ -3052,6 +3070,7 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             img_bytes = base64.b64decode(payload["image_base64"])
+            _validate_image_bytes(img_bytes)
             wa = payload.get("weights_a", "rtdetr-x.pt")
             wb = payload.get("weights_b", "best.pt")
             import tempfile
@@ -3101,6 +3120,7 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             img_bytes = base64.b64decode(payload["image_base64"])
+            _validate_image_bytes(img_bytes)
             fname = payload.get("filename", "glyph.png")
             boxes = payload.get("boxes", [])
             from cangjie_labeler import export_yolo
