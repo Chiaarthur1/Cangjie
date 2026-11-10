@@ -2104,11 +2104,13 @@ def build_production_studio_html(
       tick();
     }}
 
+    let TRAIN_JOBS = [];
     async function refreshTrainJobs() {{
       try {{
         const r = await fetch('/api/train/list'); const d = await r.json();
+        TRAIN_JOBS = (d.jobs || []).map(j => j.id);
         const el = document.getElementById('trainJobsList');
-        el.innerHTML = (d.jobs || []).map(j => '<div style="margin:2px 0;">' + j.id + ' [' + j.type + '] <b>' + j.status + '</b> (' + j.elapsed_sec + 'с) <button class="btn-outline" onclick="pollTrainJob(\'' + j.id + '\')">Показать</button></div>').join('') || 'Нет задач';
+        el.innerHTML = (d.jobs || []).map((j, i) => '<div style="margin:2px 0;">' + j.id + ' [' + j.type + '] <b>' + j.status + '</b> (' + j.elapsed_sec + 'с) <button class="btn-outline" onclick="pollTrainJob(TRAIN_JOBS[' + i + '])">Показать</button></div>').join('') || 'Нет задач';
       }} catch (e) {{ document.getElementById('trainJobsList').innerHTML = 'Ошибка: ' + e; }}
     }}
 
