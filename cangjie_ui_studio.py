@@ -1479,6 +1479,9 @@ def build_production_studio_html(
       <button id="navBtnDuel" class="nav-btn" onclick="switchMainView('view-duel', this)">
         ⚖️ 3. Трибунал Агентов (PRL CoVe-RAG+)
       </button>
+      <button id="navBtnModels" class="nav-btn" onclick="switchMainView('view-models', this)">
+        🧩 4. Модели
+      </button>
     </nav>
 
     <!-- КНОПКИ ВЫЕЗДНЫХ МЕНЮ -->
@@ -1871,6 +1874,23 @@ def build_production_studio_html(
       </div>
     </section>
 
+    <section id="view-models" class="view-section">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title"><span class="accent">■</span> Реестр моделей и горячее переключение</div>
+          <span class="badge-tag">Детектор / Матчер / LLM / Банки шаблонов</span>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+          <button class="btn-gold" onclick="loadModelRegistry()">🔄 Обновить список</button>
+          <button class="btn-outline" onclick="switchActiveModelByKind('matcher','chamfer_hog')">Матчер → chamfer_hog</button>
+          <button class="btn-outline" onclick="switchActiveModelByKind('llm','none')">LLM → выкл</button>
+        </div>
+        <div id="modelRegistryTable" class="sec-body" style="font-size:13px; color:var(--text-silver);">
+          Нажмите «Обновить список», чтобы просканировать модели на диске (детекторы .pt, индекс эмбеддингов, банки шаблонов).
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -1932,6 +1952,55 @@ def build_production_studio_html(
       if (viewId === 'view-studio') {{
         drawMizigeGrid(stBgCtx, stBgCanvas.width, stBgCanvas.height);
       }}
+      if (viewId === 'view-models') {{ loadModelRegistry(); }}
+    }}
+
+    let MODELS_REGISTRY = [];
+    async function loadModelRegistry() {{
+      try {{
+        const r = await fetch('/api/models');
+        const d = await r.json();
+        MODELS_REGISTRY = (d.models || []).filter(m => m.kind === 'detector' || m.kind === 'matcher');
+        let html = '<table style="width:100%; border-collapse:collapse; font-size:12.5px;">';
+        html += '<tr style="color:var(--text-silver); text-align:left; border-bottom:1px solid #333;"><th style="padding:4px;">Тип</th><th style="padding:4px;">Модель</th><th style="padding:4px;">Размер</th><th style="padding:4px;">Статус</th><th></th></tr>';
+        for (let i = 0; i < MODELS_REGISTRY.length; i++) {{
+          const m = MODELS_REGISTRY[i];
+          const activeMark = m.status === 'active' ? '✅ active' : (m.status === 'coco_base' ? 'COCO-база' : m.status);
+          const btn = '<button class="btn-outline" onclick="switchActiveModel(' + i + ')">Сделать активной</button>';
+          html += '<tr style="border-bottom:1px solid #222;"><td style="padding:4px;">' + m.kind + '</td><td style="padding:4px;">' + m.id + '</td><td style="padding:4px;">' + m.size_mb + ' MB</td><td style="padding:4px;">' + activeMark + '</td><td style="padding:4px;">' + btn + '</td></tr>';
+        }}
+        html += '</table>';
+        const banks = (d.models || []).filter(m => m.kind === 'template_bank' || m.kind === 'fullchar_bank');
+        if (banks.length) {{
+          html += '<div style="margin-top:10px; font-size:12px; color:var(--text-muted);">Банки шаблонов: ' + banks.map(b => b.id).join(', ') + '</div>';
+        }}
+        document.getElementById('modelRegistryTable').innerHTML = html;
+      }} catch (e) {{
+        document.getElementById('modelRegistryTable').innerHTML = 'Не удалось загрузить реестр: ' + e;
+      }}
+    }}
+
+    function switchActiveModel(i) {{
+      const m = MODELS_REGISTRY[i];
+      if (!m) return;
+      const id = m.kind === 'detector' ? m.path : m.id;
+      fetch('/api/models/switch', {{
+        method: 'POST',
+        headers: {{ 'Content-Type': 'application/json' }},
+        body: JSON.stringify({{ kind: m.kind, id: id }})
+      }}).then(r => r.json()).then(d => {{
+        if (d.ok) {{ loadModelRegistry(); }} else {{ alert('Ошибка: ' + (d.error || 'unknown')); }}
+      }}).catch(e => alert('Ошибка: ' + e));
+    }}
+
+    function switchActiveModelByKind(kind, id) {{
+      fetch('/api/models/switch', {{
+        method: 'POST',
+        headers: {{ 'Content-Type': 'application/json' }},
+        body: JSON.stringify({{ kind: kind, id: id }})
+      }}).then(r => r.json()).then(d => {{
+        if (d.ok) {{ loadModelRegistry(); }} else {{ alert('Ошибка: ' + (d.error || 'unknown')); }}
+      }}).catch(e => alert('Ошибка: ' + e));
     }}
 
     function toggleDrawer(drawerId, openState) {{
@@ -2737,12 +2806,33 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif self.path.startswith("/api/models"):
+            from cangjie_model_registry import CangjieModelRegistry
+            reg = CangjieModelRegistry(config=self.workstation.photo_decoder.config)
+            body = json.dumps(reg.summary(), ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
         else:
             self.send_response(404)
             self.end_headers()
 
     def do_POST(self):
-        if self.path.startswith("/api/decode_photo"):
+        if self.path.startswith("/api/models/switch"):
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            from cangjie_model_registry import CangjieModelRegistry
+            reg = CangjieModelRegistry(config=self.workstation.photo_decoder.config)
+            res = reg.switch(payload.get("kind", ""), payload.get("id", ""))
+            body = json.dumps(res, ensure_ascii=False).encode("utf-8")
+            self.send_response(200 if res.get("ok") else 400)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif self.path.startswith("/api/decode_photo"):
             try:
                 length = int(self.headers.get("Content-Length", "0"))
                 raw_body = self.rfile.read(length)
