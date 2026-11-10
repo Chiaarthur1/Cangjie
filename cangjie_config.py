@@ -25,6 +25,9 @@ from typing import Any, Dict, List, Optional
 
 DEFAULT_CONFIG_PATH = "./cangjie_config.json"
 
+# Путь к обученному kNN-индексу эмбеддингов (собирается cangjie_metric_embed.py index).
+EMBEDDING_INDEX_PATH = "runs/embeddings/index.npz"
+
 DETECTOR_BACKENDS = ("auto", "rtdetr", "yolo", "pixel", "none")
 MATCHER_BACKENDS = ("chamfer_hog", "embedding")
 LLM_BACKENDS = ("none", "ollama", "vllm")
@@ -127,13 +130,18 @@ class CangjieConfig:
         return "rtdetr"
 
     def resolve_matcher_backend(self) -> str:
-        """embeddings доступны только если установлен модуль metric_embed."""
+        """embeddings активны только при наличии ОБУЧЕННОГО индекса.
+
+        Модуль metric_embed может существовать, но без собранного kNN-индекса
+        (runs/embeddings/index.npz) выбор 'embedding' честно падает на chamfer_hog.
+        """
         if self.matcher.backend == "embedding":
             try:
                 import cangjie_metric_embed  # noqa: F401
-                return "embedding"
+                if os.path.exists(EMBEDDING_INDEX_PATH):
+                    return "embedding"
             except Exception:
-                return "chamfer_hog"
+                pass
         return "chamfer_hog"
 
     # --- валидация -----------------------------------------------------
