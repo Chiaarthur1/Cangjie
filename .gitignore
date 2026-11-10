@@ -21,3 +21,7 @@ data/cangjie_fullchar_templates_*.npz
 data/labeled/
 runs/jobs/
 runs/embeddings/
+*.tar.gz
+data/cangjie_ram_cache_v6.pkl
+data/graphics.txt.fast_v8.pkl
+data/neo4j_ontology_dump.json
