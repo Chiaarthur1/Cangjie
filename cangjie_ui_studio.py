@@ -1485,6 +1485,12 @@ def build_production_studio_html(
       <button id="navBtnTrain" class="nav-btn" onclick="switchMainView('view-train', this)">
         🚀 5. Обучение
       </button>
+      <button id="navBtnData" class="nav-btn" onclick="switchMainView('view-data', this)">
+        🗂️ 6. Данные
+      </button>
+      <button id="navBtnSettings" class="nav-btn" onclick="switchMainView('view-settings', this)">
+        ⚙️ 7. Eval + Настройки
+      </button>
     </nav>
 
     <!-- КНОПКИ ВЫЕЗДНЫХ МЕНЮ -->
@@ -1914,6 +1920,35 @@ def build_production_studio_html(
       </div>
     </section>
 
+    <section id="view-data" class="view-section">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title"><span class="accent">■</span> Реестр датасетов</div>
+          <span class="badge-tag">статус на диске</span>
+        </div>
+        <button class="btn-gold" onclick="loadDatasets()" style="margin-bottom:12px;">🔄 Обновить статус</button>
+        <div id="datasetsTable" class="sec-body" style="font-size:12.5px; color:var(--text-silver);">Нажмите «Обновить статус».</div>
+      </div>
+    </section>
+
+    <section id="view-settings" class="view-section">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title"><span class="accent">■</span> Оценка качества и операции</div>
+          <span class="badge-tag">eval / rebuild / config</span>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+          <button class="btn-gold" onclick="runTreeEval()">📊 Честный eval разбора IDS</button>
+          <button class="btn-outline" onclick="startRebuild('KAISHU')">♻️ Пересобрать банк KAISHU</button>
+          <button class="btn-outline" onclick="loadConfigInfo()">⚙️ Показать конфиг</button>
+        </div>
+        <div class="dossier-section highlight-gold">
+          <div class="sec-tag">Результат операции</div>
+          <div id="opsResult" class="sec-body" style="font-size:12px; color:var(--text-silver);">Запустите операцию.</div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -1976,6 +2011,8 @@ def build_production_studio_html(
         drawMizigeGrid(stBgCtx, stBgCanvas.width, stBgCanvas.height);
       }}
       if (viewId === 'view-models') {{ loadModelRegistry(); }}
+      if (viewId === 'view-data') {{ loadDatasets(); }}
+      if (viewId === 'view-settings') {{ loadConfigInfo(); }}
     }}
 
     let MODELS_REGISTRY = [];
@@ -2059,6 +2096,41 @@ def build_production_studio_html(
         const el = document.getElementById('trainJobsList');
         el.innerHTML = (d.jobs || []).map(j => '<div style="margin:2px 0;">' + j.id + ' [' + j.type + '] <b>' + j.status + '</b> (' + j.elapsed_sec + 'с) <button class="btn-outline" onclick="pollTrainJob(\'' + j.id + '\')">Показать</button></div>').join('') || 'Нет задач';
       }} catch (e) {{ document.getElementById('trainJobsList').innerHTML = 'Ошибка: ' + e; }}
+    }}
+
+    async function loadDatasets() {{
+      try {{
+        const r = await fetch('/api/datasets'); const d = await r.json();
+        const rows = (d.datasets || []).map(s => '<tr style="border-bottom:1px solid #222;"><td style="padding:4px;">' + (s.present ? '✅' : '❌') + '</td><td style="padding:4px;">' + s.name + '</td><td style="padding:4px;">' + s.local_dir + '</td><td style="padding:4px;">' + s.license + '</td></tr>').join('');
+        document.getElementById('datasetsTable').innerHTML = '<table style="width:100%; border-collapse:collapse; font-size:12.5px;"><tr style="color:var(--text-silver); text-align:left;"><th></th><th>Датасет</th><th>Путь</th><th>Лицензия</th></tr>' + rows + '</table>';
+      }} catch (e) {{ document.getElementById('datasetsTable').innerHTML = 'Ошибка: ' + e; }}
+    }}
+
+    async function runTreeEval() {{
+      const el = document.getElementById('opsResult');
+      el.innerHTML = 'Выполняется…';
+      try {{
+        const r = await fetch('/api/eval', {{ method: 'POST', headers: {{ 'Content-Type': 'application/json' }}, body: JSON.stringify({{ kind: 'tree', samples: 500 }}) }});
+        const d = await r.json();
+        el.innerHTML = '<pre style="white-space:pre-wrap; font-size:11px;">' + JSON.stringify(d, null, 2) + '</pre>';
+      }} catch (e) {{ el.innerHTML = 'Ошибка: ' + e; }}
+    }}
+
+    async function startRebuild(era) {{
+      const el = document.getElementById('opsResult');
+      try {{
+        const r = await fetch('/api/rebuild', {{ method: 'POST', headers: {{ 'Content-Type': 'application/json' }}, body: JSON.stringify({{ era: era }}) }});
+        const d = await r.json();
+        el.innerHTML = 'Запущена пересборка: job_id=' + d.job_id + ' — смотрите вкладку «Обучение».';
+      }} catch (e) {{ el.innerHTML = 'Ошибка: ' + e; }}
+    }}
+
+    async function loadConfigInfo() {{
+      const el = document.getElementById('opsResult');
+      try {{
+        const r = await fetch('/api/config'); const d = await r.json();
+        el.innerHTML = '<pre style="white-space:pre-wrap; font-size:11px;">' + JSON.stringify(d.config, null, 2) + '</pre>';
+      }} catch (e) {{ el.innerHTML = 'Ошибка: ' + e; }}
     }}
 
     function toggleDrawer(drawerId, openState) {{
@@ -2873,6 +2945,15 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif self.path.startswith("/api/datasets"):
+            from cangjie_dataset_manager import CangjieDatasetManager
+            mgr = CangjieDatasetManager(config=self.workstation.photo_decoder.config)
+            body = json.dumps({"datasets": [s.__dict__ for s in mgr.status()]}, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
         elif self.path.startswith("/api/train/list"):
             from cangjie_train_manager import get_train_manager
             body = json.dumps(get_train_manager().list_jobs(), ensure_ascii=False).encode("utf-8")
@@ -2896,7 +2977,36 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
-        if self.path.startswith("/api/train"):
+        if self.path.startswith("/api/eval"):
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            kind = payload.get("kind", "tree")
+            if kind == "tree":
+                from cangjie_tree_eval import run_eval
+                res = run_eval("./data", max_samples=int(payload.get("samples", 500)))
+                body = json.dumps(res, ensure_ascii=False).encode("utf-8")
+                code = 200
+            else:
+                res = {"ok": False, "error": f"Неизвестный вид оценки: {kind} (доступно: tree)"}
+                body = json.dumps(res, ensure_ascii=False).encode("utf-8")
+                code = 400
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif self.path.startswith("/api/rebuild"):
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            from cangjie_train_manager import get_train_manager
+            res = get_train_manager().start("rebuild_components", {"era": payload.get("era", "KAISHU")})
+            body = json.dumps(res, ensure_ascii=False).encode("utf-8")
+            self.send_response(200 if res.get("ok") else 400)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif self.path.startswith("/api/train"):
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             from cangjie_train_manager import get_train_manager

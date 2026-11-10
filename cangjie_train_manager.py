@@ -70,6 +70,9 @@ class CangjieTrainManager:
             data = params.get("data", "./cangjie_yolo_dataset/data.yaml")
             return [py, "cangjie_rtdetr_train.py", "--profile", profile,
                     "--run-ultralytics", "--epochs", str(epochs), "--data", data]
+        if job_type == "rebuild_components":
+            era = params.get("era", "KAISHU")
+            return [py, "cangjie_rebuild_banks.py", "--component", "--era", era, "--data-dir", "./data"]
         return None
 
     def _refresh(self, job_id: str) -> Dict[str, Any]:
