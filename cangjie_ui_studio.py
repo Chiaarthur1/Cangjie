@@ -1482,6 +1482,9 @@ def build_production_studio_html(
       <button id="navBtnModels" class="nav-btn" onclick="switchMainView('view-models', this)">
         🧩 4. Модели
       </button>
+      <button id="navBtnTrain" class="nav-btn" onclick="switchMainView('view-train', this)">
+        🚀 5. Обучение
+      </button>
     </nav>
 
     <!-- КНОПКИ ВЫЕЗДНЫХ МЕНЮ -->
@@ -1891,6 +1894,26 @@ def build_production_studio_html(
       </div>
     </section>
 
+    <section id="view-train" class="view-section">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title"><span class="accent">■</span> Фоновое обучение</div>
+          <span class="badge-tag">sanity / embeddings / detector</span>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+          <button class="btn-gold" onclick="startTrainJob('sanity_loss')">🧪 Sanity-проверка лосса (CPU)</button>
+          <button class="btn-outline" onclick="startTrainJob('embed_train')">🔗 Обучение эмбеддингов (CPU)</button>
+          <button class="btn-outline" onclick="startTrainJob('detector')">🎯 Обучение детектора (GPU)</button>
+          <button class="btn-outline" onclick="refreshTrainJobs()">🔄 Обновить задачи</button>
+        </div>
+        <div id="trainJobsList" class="sec-body" style="font-size:12px; color:var(--text-silver); margin-bottom:10px;">Нет запущенных задач.</div>
+        <div class="dossier-section highlight-gold">
+          <div class="sec-tag">📜 Лог и статус выбранной задачи</div>
+          <div id="trainStatusArea" class="sec-body" style="font-size:12px; color:var(--text-silver);">Запустите задачу, чтобы видеть прогресс.</div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -2001,6 +2024,41 @@ def build_production_studio_html(
       }}).then(r => r.json()).then(d => {{
         if (d.ok) {{ loadModelRegistry(); }} else {{ alert('Ошибка: ' + (d.error || 'unknown')); }}
       }}).catch(e => alert('Ошибка: ' + e));
+    }}
+
+    async function startTrainJob(type) {{
+      const params = {{}};
+      if (type === 'sanity_loss') params.epochs = 8;
+      try {{
+        const r = await fetch('/api/train', {{
+          method: 'POST',
+          headers: {{ 'Content-Type': 'application/json' }},
+          body: JSON.stringify({{ type: type, params: params }})
+        }});
+        const d = await r.json();
+        if (d.ok) {{ pollTrainJob(d.job_id); refreshTrainJobs(); }} else {{ alert('Ошибка: ' + (d.error || 'unknown')); }}
+      }} catch (e) {{ alert('Ошибка: ' + e); }}
+    }}
+
+    async function pollTrainJob(jobId) {{
+      const area = document.getElementById('trainStatusArea');
+      const tick = async () => {{
+        try {{
+          const r = await fetch('/api/train/status?job_id=' + encodeURIComponent(jobId));
+          const d = await r.json();
+          area.innerHTML = '<div style="color:var(--accent-gold); margin-bottom:6px;">Задача ' + d.id + ' [' + d.type + '] — <b>' + d.status + '</b> (' + d.elapsed_sec + 'с)' + (d.exit_code !== undefined ? ' | exit=' + d.exit_code : '') + '</div><pre style="white-space:pre-wrap; font-size:11px; color:var(--text-silver); background:#0b0b0f; padding:8px; border-radius:6px; max-height:320px; overflow:auto;">' + (d.log_tail || '') + '</pre>';
+          if (d.status === 'running') setTimeout(tick, 1500); else refreshTrainJobs();
+        }} catch (e) {{ area.innerHTML = 'Ошибка опроса: ' + e; }}
+      }};
+      tick();
+    }}
+
+    async function refreshTrainJobs() {{
+      try {{
+        const r = await fetch('/api/train/list'); const d = await r.json();
+        const el = document.getElementById('trainJobsList');
+        el.innerHTML = (d.jobs || []).map(j => '<div style="margin:2px 0;">' + j.id + ' [' + j.type + '] <b>' + j.status + '</b> (' + j.elapsed_sec + 'с) <button class="btn-outline" onclick="pollTrainJob(\'' + j.id + '\')">Показать</button></div>').join('') || 'Нет задач';
+      }} catch (e) {{ document.getElementById('trainJobsList').innerHTML = 'Ошибка: ' + e; }}
     }}
 
     function toggleDrawer(drawerId, openState) {{
@@ -2815,12 +2873,41 @@ class CangjieWorkstationHTTPHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif self.path.startswith("/api/train/list"):
+            from cangjie_train_manager import get_train_manager
+            body = json.dumps(get_train_manager().list_jobs(), ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif self.path.startswith("/api/train/status"):
+            from urllib.parse import urlparse, parse_qs
+            from cangjie_train_manager import get_train_manager
+            job_id = parse_qs(urlparse(self.path).query).get("job_id", [""])[0]
+            body = json.dumps(get_train_manager().status(job_id), ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
         else:
             self.send_response(404)
             self.end_headers()
 
     def do_POST(self):
-        if self.path.startswith("/api/models/switch"):
+        if self.path.startswith("/api/train"):
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            from cangjie_train_manager import get_train_manager
+            res = get_train_manager().start(payload.get("type", ""), payload.get("params", {}))
+            body = json.dumps(res, ensure_ascii=False).encode("utf-8")
+            self.send_response(200 if res.get("ok") else 400)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif self.path.startswith("/api/models/switch"):
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             from cangjie_model_registry import CangjieModelRegistry
