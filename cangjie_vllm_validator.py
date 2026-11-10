@@ -265,7 +265,7 @@ class BenchmarkValidationHarness:
         m = report["metrics"]
         sb = report["subsets"]
 
-        md_content = f"""# Project Cangjie — Phase 2 VLM Anti-Hallucination Validation Report
+        md_content = rf"""# Project Cangjie — Phase 2 VLM Anti-Hallucination Validation Report
 **Модель:** `{report['model']}`  
 **Дата прогона:** `{report['timestamp']}`  
 **Время выполнения:** `{report['execution_time_seconds']} с` ({report['speed_samples_per_sec']} сэмплов/сек)  
